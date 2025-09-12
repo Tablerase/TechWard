@@ -1,0 +1,19 @@
+.room {
+  stroke: black;
+  stroke-width: 2;
+  transition: fill 0.3s;
+}
+
+.room.critical {
+  fill: red;
+}
+
+.room.healthy {
+  fill: green;
+}
+
+.patient-room-container {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin-top: 50px;
+}

@@ -61,10 +61,8 @@ Takeaway: I can handle incident management + automation.
 
 - New Room: Supply = Database.
 - Skill Demo: PostgreSQL, backup/restore, persistence in K8s.
-
-Problem Example: Missing supply → backup failed.
-
-Resolution: Caregiver triggers backup job via backend.
+- Problem Example: Missing supply → backup failed.
+- Resolution: Caregiver triggers backup job via backend.
 
 Takeaway: I know stateful workloads + data resilience.
 
@@ -76,7 +74,7 @@ Takeaway: I know stateful workloads + data resilience.
 
 Takeaway: I can bridge backend + mobile ecosystems.
 
-#### 🏥 Iteration 6 – Advanced Floors (Scaling & Multi-User)
+#### 🏥 Iteration 6 – Advanced Floors (Scaling & Multi-User) - (To Learn/Experiment with)
 
 - New Feature: Multi-floor ward.
 - Skill Demo: HPA (autoscaling), role-based access (lock problems).

@@ -18,6 +18,11 @@ app.get("/problems", (req, res) => {
   });
 });
 
+// Problems resolution
+app.post("/resolve/:id", (req, res) => {
+  res.json({ id: 1, status: "resolved" });
+});
+
 app.listen(PORT, () => {
   console.log(`🚑 Tech Ward backend running at http://localhost:${PORT}`);
 });

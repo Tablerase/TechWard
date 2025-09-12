@@ -1,7 +1,10 @@
-import express from "express";
+import express, { json } from "express";
+import patient from "./entity/problems";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+const demoPatient = patient;
 
 // Health route
 app.get("/health", (req, res) => {
@@ -10,17 +13,29 @@ app.get("/health", (req, res) => {
 
 // Problems route
 app.get("/problems", (req, res) => {
-  res.json({
-    id: 1,
-    room: "Patient Room",
-    status: "critical",
-    problem: "Bandage outdated - Deployment drift detected",
-  });
+  let resBody = {};
+  if (demoPatient.status == "resolved") {
+    resBody = {
+      id: 1,
+      room: "Patient Room",
+      status: demoPatient.status,
+      problem: "Bandage clean - No Deployment drift detected",
+    };
+  } else {
+    resBody = {
+      id: 1,
+      room: "Patient Room",
+      status: demoPatient.status,
+      problem: "Bandage outdated - Deployment drift detected",
+    };
+  }
+  res.json(resBody);
 });
 
 // Problems resolution
 app.post("/resolve/:id", (req, res) => {
-  res.json({ id: 1, status: "resolved" });
+  ((demoPatient.status = "resolved"),
+    res.json({ id: 1, status: demoPatient.status }));
 });
 
 app.listen(PORT, () => {

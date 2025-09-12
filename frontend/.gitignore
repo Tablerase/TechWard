@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Vite cache
+.vite/
+
+# Env files (if you keep secrets locally)
+.env
+.env.*

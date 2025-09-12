@@ -18,7 +18,7 @@ Each room in the hospital represents a technical skill or service, and each pati
 
 ## 📌 Project Planning
 
-For this project i will try to follows/learn an agile-style workflow using GitHub Projects.
+For this project, I will try to follows/learn an agile-style workflow using GitHub Projects.
 
 - Issues represent tasks & features.
 - Project board tracks To Do → In Progress → Done.

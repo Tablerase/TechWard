@@ -1,8 +1,24 @@
-import express, { json } from "express";
-import patient from "./entity/problems";
+import express from "express";
+import cors from "cors";
+import patient from "@entity/problems";
+import { config } from "dotenv";
 
+// Config
+config(); // Loads env var
+
+// Express
 const app = express();
 const PORT = process.env.PORT || 3000;
+const allowedOrigins = process.env.ALLOWED_ORIGINS || "localhost";
+
+// CORS: https://expressjs.com/en/resources/middleware/cors.html
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "http://localhost"],
+    methods: ["GET", "PUT", "POST", "DELETE"],
+    credentials: true,
+  }),
+);
 
 const demoPatient = patient;
 
@@ -39,5 +55,7 @@ app.post("/resolve/:id", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚑 Tech Ward backend running at http://localhost:${PORT}`);
+  console.log(
+    `🚑 Tech Ward backend running at http://localhost:${PORT} in ${process.env.NODE_ENV} mode`,
+  );
 });

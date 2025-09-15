@@ -1,9 +1,20 @@
-export interface Patient {
-  status: "critical" | "resolved"
-};
+export type PatientStatus = "critical" | "resolved";
 
-const patient : Patient = {
-  status: 'critical' 
+export interface Patient {
+  status: PatientStatus;
+}
+
+export const patient: Patient = {
+  status: "critical",
 };
 
 export default patient;
+
+export class Problem {
+  title: string;
+  description: string;
+  constructor(title: string, description: string) {
+    this.title = title;
+    this.description = description;
+  }
+}

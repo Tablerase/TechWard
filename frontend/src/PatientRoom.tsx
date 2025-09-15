@@ -1,11 +1,25 @@
 // src/PatientRoom.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./PatientRoom.css";
 
 type PatientStatus = "critical" | "healthy";
 
 export const PatientRoom = () => {
   const [status, setStatus] = useState<PatientStatus>("critical");
+
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const resp = await fetch("http://localhost:3000/problems");
+        const data = await resp.json();
+        console.log(data);
+      } catch (err) {
+        console.error('Error while fetching PatientStatus', err);
+      }
+    };
+
+    fetchStatus();
+  }, []);
 
   const toggleStatus = () => {
     setStatus(status === "critical" ? "healthy" : "critical");
@@ -37,9 +51,9 @@ export const PatientRoom = () => {
         fontSize={45}
         fontWeight={900}
         letterSpacing={-6}
-        fill="white"
-        stroke="black"
-        strokeWidth={3}
+        fill="transparent"
+        stroke="#333333cc"
+        strokeWidth={2}
         paintOrder="stroke fill markers"
         dominantBaseline="middle"
         className="roomText"
@@ -48,7 +62,7 @@ export const PatientRoom = () => {
           <animate
             attributeName="startOffset"
             values="-50%;100%;"
-            dur="8s"
+            dur="10s"
             repeatCount="indefinite"
           />
           Claude ARGO

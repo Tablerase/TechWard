@@ -69,6 +69,8 @@ git checkout -b feature/your-feature-name
    ```bash
    git push origin main
    git branch -d feature/your-feature-name
+   # If remote branch need to be rm
+   git push origin --delete feature/your-feature-name
    ```
 
 <!-- --- -->

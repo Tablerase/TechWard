@@ -1,5 +1,4 @@
-// src/App.tsx
-import { PatientRoom } from "@/PatientRoom";
+import { PatientRoom } from "@components/PatientRoom";
 
 function App() {
   return <PatientRoom />;

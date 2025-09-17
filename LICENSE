@@ -1,0 +1,59 @@
+Custom Proprietary License Agreement
+=====================================
+
+Copyright (c) 2025 Romain CUTTE
+
+1. Definitions
+--------------
+Licensor: Romain CUTTE, the creator and copyright holder of the Software.
+Licensee: Any person or entity using the Software.
+Software: This project, including all source code, documentation, and any associated materials provided by the Licensor.
+
+2. Grant of License
+-------------------
+The Licensor grants the Licensee a non-exclusive, non-commercial, personal, and educational right to:
+- View, study, and fork the Software for personal learning, research, or educational purposes.
+- Use the Software in private or educational projects, including private repositories or classroom settings.
+
+The Licensee may not:
+- Use the Software for any commercial, revenue-generating, or business purposes.
+- Sell, sublicense, or redistribute the Software (except via forks for educational purposes).
+- Claim ownership of the Software or any derivative works.
+
+3. Restrictions
+---------------
+- No Modification for Commercial Use: The Licensee may not modify, adapt, or create derivative works of the Software for commercial purposes.
+- No Redistribution for Profit: The Software may not be redistributed, sold, or sublicensed.
+- No Derivative Licensing: Any derivative work must retain this license and may not be relicensed.
+- No Circumvention: The Licensee may not bypass or remove licensing notices or restrictions.
+
+4. Ownership and Intellectual Property
+---------------------------------------
+All rights, title, and interest in the Software, including all copyrights, patents, trademarks, and other intellectual property rights, remain with the Licensor.
+The Licensee does not acquire any ownership rights under this license.
+
+5. Attribution
+--------------
+Any public fork or use must include the following notice:
+"This software is provided for educational purposes only. Commercial use is prohibited. Copyright (c) 2025 Romain CUTTE."
+
+6. License Changes
+------------------
+The Licensor may change license terms for future versions.
+Existing versions remain governed by this license.
+
+7. Termination
+--------------
+This license is effective until terminated.
+The Licensor may terminate it if the Licensee violates any terms.
+Upon termination, the Licensee must cease all use of the Software.
+
+8. Disclaimer of Warranty
+-------------------------
+The Software is provided "as is", without warranty of any kind, express or implied.
+The Licensor is not liable for any damages arising from its use.
+
+9. Governing Law
+----------------
+This agreement is governed by the laws of France.
+

@@ -6,16 +6,14 @@
     "outDir": "dist",
     // Alias
     "paths": {
-      "@config/*": ["src/config/*"],
-      "@controllers/*": ["src/controllers/*"],
-      "@entity/*": ["src/entity/*"],
-      "@models/*": ["src/models/*"],
-      "@routes/*": ["src/routes/*"],
-      "@utils/*": ["src/utils/*"],
-      "@services/*": ["src/services/*"]
+      "@/*": ["src/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@components/*": ["src/components/*"],
+      "@assets/*": ["src/assets/*"],
+      "@services/*": ["src/services/*"],
+      "@utils/*": ["src/utils/*"]
     }
   },
-  "include": ["src/**/*", "test/**/*", "jest.config.js"],
   "exclude": ["dist", "node_modules", "**/*.config.*", "eslint.config.ts"],
 
   "files": [],

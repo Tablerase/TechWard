@@ -1,11 +1,10 @@
 // src/PatientRoom.tsx
 import { useEffect, useState } from "react";
 import "./PatientRoom.css";
-
-type PatientStatus = "critical" | "healthy";
+import type { Problem } from "@entity/problems";
 
 export const PatientRoom = () => {
-  const [status, setStatus] = useState<PatientStatus>("critical");
+  const [problem, setProblem] = useState<Problem | null>(null);
 
   useEffect(() => {
     const fetchStatus = async () => {
@@ -13,8 +12,9 @@ export const PatientRoom = () => {
         const resp = await fetch("http://localhost:3000/problems");
         const data = await resp.json();
         console.log(data);
+        setProblem(data);
       } catch (err) {
-        console.error('Error while fetching PatientStatus', err);
+        console.error("Error while fetching PatientStatus", err);
       }
     };
 
@@ -22,7 +22,7 @@ export const PatientRoom = () => {
   }, []);
 
   const toggleStatus = () => {
-    setStatus(status === "critical" ? "healthy" : "critical");
+    setProblem(problem ? { ...problem, status: "resolved" } : null);
   };
 
   return (

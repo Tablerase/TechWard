@@ -1,4 +1,23 @@
 {
+  "compilerOptions": {
+    // File Layout
+    "baseUrl": ".",
+    "rootDir": ".",
+    "outDir": "dist",
+    // Alias
+    "paths": {
+      "@config/*": ["src/config/*"],
+      "@controllers/*": ["src/controllers/*"],
+      "@entity/*": ["src/entity/*"],
+      "@models/*": ["src/models/*"],
+      "@routes/*": ["src/routes/*"],
+      "@utils/*": ["src/utils/*"],
+      "@services/*": ["src/services/*"]
+    }
+  },
+  "include": ["src/**/*", "test/**/*", "jest.config.js"],
+  "exclude": ["dist", "node_modules", "**/*.config.*", "eslint.config.ts"],
+
   "files": [],
   "references": [
     { "path": "./tsconfig.app.json" },

@@ -1,0 +1,8 @@
+# python3 -m venv .venv
+# source .venv/bin/activate
+# pip install -r ansible/requirements.txt
+
+# Python deps to run Ansible locally for k3d
+ansible-core>=2.19
+# Optional (enables json_query filter; harmless even if unused)
+jmespath>=1.0.1

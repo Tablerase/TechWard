@@ -1,0 +1,55 @@
+# Ansible
+
+*.retry
+*.log
+logs/
+.ansible/
+
+# Ignore Ansible Vault files
+*.vault
+*.vault_pass*
+vault.yml
+
+# Ignore key files
+keys/
+*.pem
+*.key
+*.pub
+
+# Ignore inventory files with host details
+inventory/inventory.yml
+
+# Ignore Python virtual environments and logs
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+*.pyd
+*.egg-info/
+*.eggs/
+*.whl
+*.db
+*.sqlite3
+*.DS_Store
+*.coverage
+*.tox/
+*.mypy_cache/
+*.pytest_cache/
+*.ipynb_checkpoints/
+*.env
+.env.*
+*.venv
+*.virtualenv
+*.venv/
+*.virtualenvs/
+
+# Ignore IDE and editor specific files
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+*.bak
+.venv/

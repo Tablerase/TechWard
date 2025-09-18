@@ -1,0 +1,76 @@
+---
+- name: Install k3d and create a cluster
+  hosts: all
+  become: true
+
+  vars:
+    # https://github.com/k3d-io/k3d/releases
+    k3d_version: v5.8.3
+    k3d_cluster_name: tech-ward
+    k3d_servers: 1
+
+    k3d_os_map:
+      Linux: linux
+      Darwin: darwin
+    k3d_arch_map:
+      x86_64: amd64
+      aarch64: arm64
+      arm64: arm64
+
+    k3d_os: "{{ k3d_os_map.get(ansible_system, 'linux') }}"
+    k3d_arch: "{{ k3d_arch_map.get(ansible_architecture, 'amd64') }}"
+    k3d_url: "https://github.com/k3d-io/k3d/releases/download/{{ k3d_version }}/k3d-{{ k3d_os }}-{{ k3d_arch }}"
+    k3d_install_path: /usr/local/bin/k3d
+
+  pre_tasks:
+    - name: Preflight | Ensure Docker is available
+      ansible.builtin.command: docker version
+      register: docker_version
+      changed_when: false
+      failed_when: docker_version.rc != 0
+      tags: [preflight]
+
+  tasks:
+    - name: Ensure basic packages (Linux)
+      ansible.builtin.package:
+        name:
+          - curl
+          - ca-certificates
+          - jq
+        state: present
+      when: ansible_os_family != 'Darwin'
+
+    - name: Download k3d binary
+      ansible.builtin.get_url:
+        url: "{{ k3d_url }}"
+        dest: "{{ k3d_install_path }}"
+        mode: "0755"
+
+    - name: Verify k3d installed
+      ansible.builtin.command: "{{ k3d_install_path }} version"
+      register: k3d_version_out
+      changed_when: false
+
+    - name: Ensure kube config dir exists for current user
+      become: false
+      ansible.builtin.file:
+        path: "{{ ansible_env.HOME }}/.kube"
+        state: directory
+        mode: "0755"
+
+    - name: List existing k3d clusters (JSON)
+      ansible.builtin.command: "{{ k3d_install_path }} cluster list -o json"
+      register: clusters_json
+      changed_when: false
+
+    - name: Create k3d cluster if missing
+      ansible.builtin.command: >
+        {{ k3d_install_path }} cluster create {{ k3d_cluster_name }}
+        --servers {{ k3d_servers }}
+        --wait --timeout 120s
+      when: >
+        (clusters_json.stdout | from_json | selectattr('name','equalto',k3d_cluster_name) | list | length) == 0
+
+    - name: Show clusters
+      ansible.builtin.command: "{{ k3d_install_path }} cluster list"
+      changed_when: false

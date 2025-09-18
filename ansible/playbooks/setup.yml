@@ -1,0 +1,8 @@
+---
+- name: Base system setup and developer tools
+  hosts: all
+  become: true
+  roles:
+    - role: common
+    - role: docker
+    - role: kubernetes

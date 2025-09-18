@@ -1,0 +1,6 @@
+# Docker role default variables
+
+# Set to true to uninstall Docker instead of installing it
+# This will remove Docker Engine, CLI, containerd, Docker Compose,
+# all Docker data (images, containers, volumes), and repository configuration
+docker_cleanup: false

@@ -1,0 +1,63 @@
+- name: Update APT package cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+  register: common_apt_update_result
+  failed_when: false
+  tags:
+    - packages
+    - update
+
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - python3-pip
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+      - gnupg
+    state: present
+  become: true
+  register: common_apt_install_result
+  tags:
+    - packages
+    - install
+
+- name: Create a user for the project
+  ansible.builtin.user:
+    name: "{{ project_user }}"
+    comment: "Project User"
+    shell: /bin/bash
+    create_home: true
+    home: "/home/{{ project_user }}"
+    state: present
+  become: true
+  register: common_user_create_result
+  tags:
+    - user
+    - create
+
+- name: Add user to sudoers with limited privileges
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers
+    line: "{{ project_user }} ALL=(ALL) NOPASSWD: /usr/bin/docker, /usr/bin/docker-compose, /bin/systemctl"
+    validate: visudo -cf %s
+  become: true
+  register: common_sudoers_result
+  tags:
+    - user
+    - sudoers
+
+- name: Ensure project user home directory has correct permissions
+  ansible.builtin.file:
+    path: "/home/{{ project_user }}"
+    state: directory
+    owner: "{{ project_user }}"
+    group: "{{ project_user }}"
+    mode: "0755"
+  become: true
+  tags:
+    - user
+    - security

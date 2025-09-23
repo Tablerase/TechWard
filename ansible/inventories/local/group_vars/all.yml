@@ -1,0 +1,5 @@
+---
+# Shared variables for local environment overrides
+
+# Local user
+project_user: caregiver

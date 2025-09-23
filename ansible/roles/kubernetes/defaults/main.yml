@@ -1,0 +1,8 @@
+---
+# Variables used by kubernetes role tasks
+# Keep names consistent with tasks/main.yml
+# Kubernetes version to install - see https://kubernetes.io/releases/ for available versions
+kubernetes_version_minor: "v1.34"
+kubernetes_keyring_path: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+# Note: kubectl version should be within one minor version of your cluster
+# For example, a v1.34 client can communicate with v1.33, v1.34, and v1.35 control planes

@@ -1,8 +1,8 @@
+import { Patient } from "@/types";
+import { useProblemToggle } from "@hooks/useProblemToggle";
+import { getPatientById } from "@services/patientService";
 import { useEffect, useMemo, useState } from "react";
 import "./PatientRoom.css";
-import { getPatientById } from "@services/patientService";
-import { useProblemToggle } from "@hooks/useProblemToggle";
-import { Patient } from "@/types";
 
 export const PatientRoom = () => {
   const [patient, setPatient] = useState<Patient | null>(null);
@@ -69,7 +69,7 @@ export const PatientRoom = () => {
             dur="10s"
             repeatCount="indefinite"
           />
-          { loading ? "" : patient?.name }
+          {loading ? "" : patient?.name}
         </textPath>
       </text>
       <foreignObject x="190" y="200" width="150" height="120">
@@ -85,8 +85,8 @@ export const PatientRoom = () => {
             {loading
               ? "Updating..."
               : status === "resolved"
-              ? "Mark Critical"
-              : "Resolve Problem"}
+                ? "Mark Critical"
+                : "Resolve Problem"}
           </button>
         </div>
       </foreignObject>

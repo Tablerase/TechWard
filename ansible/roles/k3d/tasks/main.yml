@@ -1,0 +1,101 @@
+---
+- name: Ensure running on Linux
+  ansible.builtin.assert:
+    that: ansible_system == "Linux"
+    fail_msg: "k3d install supports Linux hosts only."
+  tags:
+    - k3d_install
+
+- name: Compute k3d download URL
+  ansible.builtin.set_fact:
+    k3d_url: "https://github.com/k3d-io/k3d/releases/download/{{ k3d_version }}/k3d-{{ k3d_os }}-{{ k3d_arch }}"
+  tags:
+    - k3d_install
+
+- name: Download k3d binary
+  ansible.builtin.get_url:
+    url: "{{ k3d_url }}"
+    dest: "{{ k3d_install_path }}"
+    mode: "0755"
+  tags:
+    - k3d_install
+
+- name: Verify k3d installed
+  ansible.builtin.command: "{{ k3d_install_path }} version"
+  register: k3d_version_out
+  changed_when: false
+  tags:
+    - k3d_install
+
+- name: Ensure kube config dir exists for current user
+  # become: true
+  ansible.builtin.file:
+    path: "/home/{{ project_user }}/.kube"
+    state: directory
+    owner: "{{ project_user }}"
+    group: "{{ project_user }}"
+    mode: "0755"
+  tags:
+    - k3d_cluster
+
+- name: List existing k3d clusters (JSON)
+  ansible.builtin.command: "{{ k3d_install_path }} cluster list -o json"
+  register: k3d_clusters_json
+  changed_when: false
+  tags:
+    - k3d_cluster
+
+- name: Create k3d cluster if missing
+  ansible.builtin.command: >
+    {{ k3d_install_path }} cluster create {{ k3d_cluster_name }}
+    --servers {{ k3d_servers }}
+    --wait --timeout 120s
+  register: k3d_cluster_create
+  changed_when: k3d_cluster_create.rc == 0
+  when: >
+    (k3d_clusters_json.stdout | from_json | selectattr('name','equalto',k3d_cluster_name) | list | length) == 0
+  tags:
+    - k3d_cluster
+
+- name: List clusters
+  ansible.builtin.command: "{{ k3d_install_path }} cluster list"
+  register: k3d_cluster_list
+  changed_when: false
+  tags:
+    - k3d_cluster
+
+- name: Show cluster list
+  ansible.builtin.debug:
+    msg: "{{ k3d_cluster_list.stdout_lines }}"
+  tags:
+    - k3d_cluster
+
+- name: Ensure kubeconfig is present
+  become: true
+  ansible.builtin.command: >
+    {{ k3d_install_path }} kubeconfig get {{ k3d_cluster_name }}
+  register: k3d_kubeconfig
+  changed_when: false
+  tags:
+    - k3d_cluster
+
+- name: Write kubeconfig to user's .kube/config
+  ansible.builtin.copy:
+    content: "{{ k3d_kubeconfig.stdout }}"
+    dest: "/home/{{ project_user }}/.kube/config"
+    mode: "0644"
+  tags:
+    - k3d_cluster
+
+- name: Test kubectl access as project user
+  ansible.builtin.command: kubectl get nodes
+  become: true
+  become_user: "{{ project_user }}"
+  environment:
+    KUBECONFIG: "/home/{{ project_user }}/.kube/config"
+  register: kubectl_test
+  changed_when: false
+
+- name: Show kubectl test output
+  ansible.builtin.debug:
+    msg: "{{ kubectl_test.stdout_lines }}"

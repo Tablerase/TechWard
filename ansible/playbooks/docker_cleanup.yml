@@ -1,0 +1,10 @@
+# Example playbook to uninstall Docker
+# Usage: ansible-playbook -i inventories/local/hosts.ini playbooks/docker_cleanup.yml
+---
+- name: Uninstall Docker from target hosts
+  hosts: all
+  gather_facts: true
+  vars:
+    docker_cleanup: true
+  roles:
+    - docker

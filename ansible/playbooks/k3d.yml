@@ -1,0 +1,6 @@
+---
+- name: Install k3d and create cluster
+  hosts: all
+  become: true
+  roles:
+    - role: k3d

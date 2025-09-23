@@ -49,6 +49,8 @@
   ansible.builtin.command: >
     {{ k3d_install_path }} cluster create {{ k3d_cluster_name }}
     --servers {{ k3d_servers }}
+    --port 80:80@loadbalancer
+    --port 443:443@loadbalancer
     --wait --timeout 120s
   register: k3d_cluster_create
   changed_when: k3d_cluster_create.rc == 0

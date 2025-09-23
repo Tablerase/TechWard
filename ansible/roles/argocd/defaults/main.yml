@@ -1,0 +1,7 @@
+---
+# Variables used by argocd role tasks
+
+argocd_namespace: argocd
+
+# https://docs.ansible.com/ansible/latest/reference_appendices/interpreter_discovery.html
+ansible_python_interpreter: "{{ playbook_dir }}/../.venv/bin/python3"

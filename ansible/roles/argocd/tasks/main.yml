@@ -1,0 +1,58 @@
+---
+# ArgoCD: https://github.com/argoproj/argo-cd
+- name: Ensure that ArgoCD namespace exists
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ argocd_namespace }}"
+    state: present
+  tags:
+    - argocd
+    - namespace
+
+- name: Install ArgoCD
+  kubernetes.core.k8s:
+    src: https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+    state: present
+    namespace: "{{ argocd_namespace }}"
+  register: argocd_install
+  until: argocd_install is succeeded
+  retries: 5
+  delay: 10
+  tags:
+    - argocd
+
+- name: Wait for Argo CD server deployment to be ready
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: Deployment
+    namespace: argocd
+    name: argocd-server
+  register: argocd_server
+  until: argocd_server.resources[0].status.readyReplicas | default(0) > 0
+  retries: 20
+  delay: 15
+
+# TLS with Ingress: https://argo-cd.readthedocs.io/en/stable/operator-manual/ingress/#traefik-v30
+
+- name: Setup Ingress for ArgoCD
+  kubernetes.core.k8s:
+    src: "files/argocd-ingress.yml"
+    state: present
+  tags:
+    - argocd
+    - ingress
+
+- name: Restart argocd-server deployment
+  kubernetes.core.k8s:
+    state: present
+    namespace: argocd
+    kind: Deployment
+    name: argocd-server
+    merge_type: strategic-merge
+    definition:
+      spec:
+        template:
+          metadata:
+            annotations:
+              kubectl.kubernetes.io/restartedAt: "{{ lookup('pipe','date +%s') }}"

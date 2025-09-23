@@ -1,6 +1,6 @@
 ---
 # Variables used by kubernetes role tasks
-# Keep names consistent with tasks/main.yml
+
 # Kubernetes version to install - see https://kubernetes.io/releases/ for available versions
 kubernetes_version_minor: "v1.34"
 kubernetes_keyring_path: /etc/apt/keyrings/kubernetes-apt-keyring.gpg

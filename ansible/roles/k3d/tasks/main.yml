@@ -28,10 +28,12 @@
     - k3d_install
 
 - name: Ensure kube config dir exists for current user
-  become: false
+  # become: true
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.kube"
+    path: "/home/{{ project_user }}/.kube"
     state: directory
+    owner: "{{ project_user }}"
+    group: "{{ project_user }}"
     mode: "0755"
   tags:
     - k3d_cluster
@@ -55,8 +57,45 @@
   tags:
     - k3d_cluster
 
-- name: Show clusters
+- name: List clusters
   ansible.builtin.command: "{{ k3d_install_path }} cluster list"
+  register: k3d_cluster_list
   changed_when: false
   tags:
     - k3d_cluster
+
+- name: Show cluster list
+  ansible.builtin.debug:
+    msg: "{{ k3d_cluster_list.stdout_lines }}"
+  tags:
+    - k3d_cluster
+
+- name: Ensure kubeconfig is present
+  become: true
+  ansible.builtin.command: >
+    {{ k3d_install_path }} kubeconfig get {{ k3d_cluster_name }}
+  register: k3d_kubeconfig
+  changed_when: false
+  tags:
+    - k3d_cluster
+
+- name: Write kubeconfig to user's .kube/config
+  ansible.builtin.copy:
+    content: "{{ k3d_kubeconfig.stdout }}"
+    dest: "/home/{{ project_user }}/.kube/config"
+    mode: "0644"
+  tags:
+    - k3d_cluster
+
+- name: Test kubectl access as project user
+  ansible.builtin.command: kubectl get nodes
+  become: true
+  become_user: "{{ project_user }}"
+  environment:
+    KUBECONFIG: "/home/{{ project_user }}/.kube/config"
+  register: kubectl_test
+  changed_when: false
+
+- name: Show kubectl test output
+  ansible.builtin.debug:
+    msg: "{{ kubectl_test.stdout_lines }}"

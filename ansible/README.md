@@ -1,4 +1,4 @@
-# Ansible for k3d (best-practice layout)
+# Ansible for k3d
 
 This directory provides a structured Ansible setup to prepare a local Linux host, install k3d, and create a local Kubernetes cluster.
 
@@ -9,10 +9,10 @@ This directory provides a structured Ansible setup to prepare a local Linux host
 - `roles/` — Roles split by concern
   - `common` — Base packages and user setup
   - `docker` — Docker engine installation and service
-  - `kubernetes` — kubectl install via pkgs.k8s.io
+  - `kubernetes` — kubectl installation
   - `k3d` — Installs k3d and creates a cluster
 - `playbooks/` — Entry-point playbooks
-  - `site.yml` — Run common, docker, and kubernetes
+  - `setup.yml` — Run common, docker, and kubernetes
   - `k3d.yml` — Install k3d and create a cluster
 
 ## Prerequisites
@@ -28,7 +28,8 @@ Optional: create and activate a virtual environment and install dependencies fro
 Run base setup (common + docker + kubernetes):
 
 ```sh
-ansible-playbook playbooks/site.yml -K
+# -K : ask for privilege escalation password if needed (sudo)
+ansible-playbook playbooks/setup.yml -K
 ```
 
 Install k3d and create the cluster:
@@ -42,7 +43,10 @@ ansible-playbook playbooks/k3d.yml -K
 Defaults live in role `defaults/main.yml` and in `inventories/local/group_vars/all.yml`.
 Common variables:
 
-- `project_user` — local developer user (default: `developer`)
+- `project_user` — local linux user
+  - least privilege principle and project isolation
+  - allowing non-privileged kubectl and docker usage, created by the `common` role
+  - used for file ownership and kubeconfig
 - `k3d_version` — k3d release tag
 - `k3d_cluster_name` — cluster name
 - `k3d_servers` — number of server nodes
@@ -52,3 +56,4 @@ Override with `-e` or by editing the appropriate `group_vars`.
 ## References
 
 - Ansible best practices: https://spacelift.io/blog/ansible-best-practices
+- Ansible kubernetes: https://galaxy.ansible.com/ui/repo/published/kubernetes/core/docs/

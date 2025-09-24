@@ -1,0 +1,5 @@
+# Ansible collections
+collections:
+  # https://galaxy.ansible.com/ui/repo/published/kubernetes/core/docs/
+  - name: kubernetes.core
+    version: 6.1.0

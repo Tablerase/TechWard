@@ -1,0 +1,5 @@
+---
+whoami_namespace: default
+
+# https://docs.ansible.com/ansible/latest/reference_appendices/interpreter_discovery.html
+ansible_python_interpreter: "{{ playbook_dir }}/../.venv/bin/python3"

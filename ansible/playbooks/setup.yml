@@ -6,3 +6,8 @@
     - role: common
     - role: docker
     - role: kubernetes
+
+- import_playbook: k3d.yml
+- import_playbook: traefik.yml
+- import_playbook: whoami.yml
+# - import_playbook: argocd.yml

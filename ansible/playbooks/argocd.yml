@@ -1,0 +1,6 @@
+---
+- name: Install and configure ArgoCD
+  hosts: all
+  become: true
+  roles:
+    - argocd

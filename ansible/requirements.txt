@@ -5,5 +5,9 @@
 # Python deps to run Ansible locally for k3d
 ansible
 ansible-lint
+
+# Ansible collections deps
+kubernetes
+
 # Optional (enables json_query filter; harmless even if unused)
 jmespath

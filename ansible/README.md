@@ -2,6 +2,23 @@
 
 This directory provides a structured Ansible setup to prepare a local Linux host, install k3d, and create a local Kubernetes cluster.
 
+## Installation
+
+```bash
+#!/bin/bash
+# create py venv
+python3 -m venv .venv
+
+# activate venv
+source .venv/bin/activate
+
+# install Python Ansible deps
+pip install -r requirements.txt
+
+# install Ansible collections
+ansible-galaxy collection install -r requirements.yml
+```
+
 ## Layout
 
 - `ansible.cfg` — Defaults for inventory and roles path
@@ -14,14 +31,6 @@ This directory provides a structured Ansible setup to prepare a local Linux host
 - `playbooks/` — Entry-point playbooks
   - `setup.yml` — Run common, docker, and kubernetes
   - `k3d.yml` — Install k3d and create a cluster
-
-## Prerequisites
-
-- Linux host (tested on Ubuntu)
-- Ansible installed locally
-- Docker will be installed by the `docker` role
-
-Optional: create and activate a virtual environment and install dependencies from `requirements.txt`.
 
 ## Quick start
 
@@ -56,4 +65,8 @@ Override with `-e` or by editing the appropriate `group_vars`.
 ## References
 
 - Ansible best practices: https://spacelift.io/blog/ansible-best-practices
+
 - Ansible kubernetes: https://galaxy.ansible.com/ui/repo/published/kubernetes/core/docs/
+
+<!-- - Ansible Kubernetes Guide FR: https://blog.stephane-robert.info/docs/conteneurs/orchestrateurs/outils/ansible-k8s/ -->
+<!-- - ArgoCD Guide FR: https://une-tasse-de.cafe/blog/argocd/ -->

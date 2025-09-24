@@ -1,0 +1,25 @@
+---
+- name: Add Traefik Helm repository
+  kubernetes.core.helm_repository:
+    name: traefik
+    repo_url: "https://traefik.github.io/charts"
+
+- name: Update Helm repo
+  command: helm repo update
+  changed_when: false
+
+- name: Create Traefik namespace
+  kubernetes.core.k8s:
+    name: "{{ traefik_namespace }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: Install Traefik from Helm chart
+  kubernetes.core.helm:
+    name: traefik
+    chart_ref: traefik/traefik
+    release_namespace: "{{ traefik_namespace }}"
+    values_files:
+      - "{{ traefik_values_file }}"
+    wait: true

@@ -1,0 +1,6 @@
+---
+- name: Deploy whoami test application
+  hosts: all
+  become: true
+  roles:
+    - whoami

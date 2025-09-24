@@ -1,0 +1,6 @@
+{
+  "yaml.schemas": {
+    // "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/refs/heads/master/v1.34.1/ingress.json": "file:///home/rcutte/Desktop/Portfolio/ansible/roles/kubernetes/files/kubernetes-dashboard-ingress.yml",
+    "https://json.schemastore.org/ansible-playbook.json": "file:///home/rcutte/Desktop/Portfolio/ansible/playbooks/*.yml"
+  }
+}

@@ -70,3 +70,7 @@ Override with `-e` or by editing the appropriate `group_vars`.
 
 <!-- - Ansible Kubernetes Guide FR: https://blog.stephane-robert.info/docs/conteneurs/orchestrateurs/outils/ansible-k8s/ -->
 <!-- - ArgoCD Guide FR: https://une-tasse-de.cafe/blog/argocd/ -->
+
+- ArgoCD : https://argo-cd.readthedocs.io/en/stable/getting_started/
+
+- Kubernetes Schemas: https://github.com/yannh/kubernetes-json-schema/tree/master

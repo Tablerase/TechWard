@@ -1,0 +1,98 @@
+# Dashboard: https://github.com/kubernetes/dashboard
+- name: Add kubernetes-dashboard Helm repo
+  kubernetes.core.helm_repository:
+    name: kubernetes-dashboard
+    repo_url: https://kubernetes.github.io/dashboard/
+  tags:
+    - kubernetes
+    - dashboard
+
+- name: Update Helm repositories (dashboard)
+  ansible.builtin.command: helm repo update
+  changed_when: false
+  tags:
+    - kubernetes
+    - dashboard
+
+- name: Deploy/Upgrade Kubernetes Dashboard
+  kubernetes.core.helm:
+    name: kubernetes-dashboard
+    chart_ref: kubernetes-dashboard/kubernetes-dashboard
+    release_namespace: "{{ kubernetes_dashboard_namespace }}"
+    create_namespace: true
+    wait: true
+    # Doc values: https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml
+    values: {}
+  tags:
+    - kubernetes
+    - dashboard
+# Dashboard user:
+# Guide sample user : https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md
+
+- name: Create admin user for Kubernetes Dashboard
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: admin-user
+        namespace: "{{ kubernetes_dashboard_namespace }}"
+  tags:
+    - kubernetes
+    - dashboard
+    - admin
+
+- name: Create ClusterRoleBinding for admin user
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRoleBinding
+      metadata:
+        name: admin-user
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: cluster-admin
+      subjects:
+        - kind: ServiceAccount
+          name: admin-user
+          namespace: "{{ kubernetes_dashboard_namespace }}"
+  tags:
+    - kubernetes
+    - dashboard
+    - admin
+
+- name: Get token for admin user
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Secret
+    namespace: "{{ kubernetes_dashboard_namespace }}"
+    label_selectors:
+      - "kubernetes.io/service-account.name=admin-user"
+  register: kubernetes_dashboard_admin_secret
+  changed_when: false
+  tags:
+    - kubernetes
+    - dashboard
+    - admin
+
+- name: Show token for admin user
+  ansible.builtin.debug:
+    msg: "Kubernetes Dashboard admin user token: {{ kubernetes_dashboard_admin_secret.resources[0].data.token | b64decode }}"
+  when: kubernetes_dashboard_admin_secret.resources | length > 0
+  tags:
+    - kubernetes
+    - dashboard
+    - admin
+
+- name: Ingress Kubernetes Dashboard
+  kubernetes.core.k8s:
+    src: "files/kubernetes-dashboard-ingress.yml"
+    state: present
+  register: kubernetes_dashboard_ingress
+  tags:
+    - kubernetes
+    - dashboard
+    - ingress

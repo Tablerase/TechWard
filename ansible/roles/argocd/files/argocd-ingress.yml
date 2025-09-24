@@ -3,7 +3,6 @@
 # https://kubernetes.io/docs/concepts/configuration/configmap/
 # ArgoCD Config: https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#atomic-configuration
 # ArgoCD with Ingress: https://argo-cd.readthedocs.io/en/stable/operator-manual/ingress/#traefik-v30
-# TODO: Verify that insecure is applied on argocd-server
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -36,7 +35,6 @@ spec:
           scheme: h2c # Needed for gRPC traffic
   tls:
     certResolver: default # Traefik will handle TLS automatically
-    # secretName: argocd-server-tls
 ---
 # https://kubernetes.io/docs/concepts/services-networking/ingress/
 # apiVersion: networking.k8s.io/v1

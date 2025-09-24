@@ -2,7 +2,5 @@
 - name: Install and configure ArgoCD
   hosts: all
   become: true
-  collections:
-    - kubernetes.core
   roles:
     - argocd

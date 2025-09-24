@@ -39,6 +39,7 @@
   kubernetes.core.k8s:
     src: "files/argocd-ingress.yml"
     state: present
+  register: argocd_ingress
   tags:
     - argocd
     - ingress
@@ -56,3 +57,7 @@
           metadata:
             annotations:
               kubectl.kubernetes.io/restartedAt: "{{ lookup('pipe','date +%s') }}"
+  when: argocd_ingress is changed
+  tags:
+    - argocd
+    - ingress

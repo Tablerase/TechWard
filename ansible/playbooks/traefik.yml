@@ -1,0 +1,6 @@
+---
+- name: Setup Traefik
+  hosts: all
+  become: true
+  roles:
+    - traefik

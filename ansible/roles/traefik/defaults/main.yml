@@ -1,0 +1,6 @@
+---
+traefik_namespace: traefik
+traefik_values_file: "{{ role_path }}/files/values.yml"
+
+# https://docs.ansible.com/ansible/latest/reference_appendices/interpreter_discovery.html
+ansible_python_interpreter: "{{ playbook_dir }}/../.venv/bin/python3"

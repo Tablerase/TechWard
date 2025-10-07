@@ -1,34 +1,5 @@
-# Dashboard: https://github.com/kubernetes/dashboard
-- name: Add kubernetes-dashboard Helm repo
-  kubernetes.core.helm_repository:
-    name: kubernetes-dashboard
-    repo_url: https://kubernetes.github.io/dashboard/
-  tags:
-    - kubernetes
-    - dashboard
-
-- name: Update Helm repositories (dashboard)
-  ansible.builtin.command: helm repo update
-  changed_when: false
-  tags:
-    - kubernetes
-    - dashboard
-
-- name: Deploy/Upgrade Kubernetes Dashboard
-  kubernetes.core.helm:
-    name: kubernetes-dashboard
-    chart_ref: kubernetes-dashboard/kubernetes-dashboard
-    release_namespace: "{{ kubernetes_dashboard_namespace }}"
-    create_namespace: true
-    wait: true
-    # Doc values: https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml
-    values: {}
-  tags:
-    - kubernetes
-    - dashboard
 # Dashboard user:
 # Guide sample user : https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md
-
 - name: Create admin user for Kubernetes Dashboard
   kubernetes.core.k8s:
     state: present
@@ -86,13 +57,3 @@
     - kubernetes
     - dashboard
     - admin
-
-- name: Ingress Kubernetes Dashboard
-  kubernetes.core.k8s:
-    src: "files/kubernetes-dashboard-ingress.yml"
-    state: present
-  register: kubernetes_dashboard_ingress
-  tags:
-    - kubernetes
-    - dashboard
-    - ingress

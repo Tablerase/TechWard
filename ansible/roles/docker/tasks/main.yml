@@ -1,5 +1,3 @@
-# Docker: https://docs.docker.com/engine/install/debian/
-
 # Docker Uninstall Tasks (only run when docker_cleanup is true)
 - name: Stop Docker service before uninstall
   ansible.builtin.service:
@@ -12,22 +10,69 @@
     - docker
     - cleanup
 
-- name: Uninstall Docker Engine, CLI, containerd, and Docker Compose packages
-  ansible.builtin.apt:
-    name:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-      - docker-buildx-plugin
-      - docker-compose-plugin
-      - docker-ce-rootless-extras
-    state: absent
-    purge: true
-  become: true
-  when: docker_cleanup | default(false) | bool
-  tags:
-    - docker
-    - cleanup
+- name: Uninstall Docker for Debian/Ubuntu
+  when:
+    - docker_cleanup | default(false) | bool
+    - ansible_pkg_mgr == "apt"
+  block:
+    - name: Uninstall Docker Engine, CLI, containerd, and Docker Compose packages
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+          - docker-ce-rootless-extras
+        state: absent
+        purge: true
+      become: true
+      tags:
+        - docker
+        - cleanup
+
+    - name: Remove Docker repository source list
+      ansible.builtin.file:
+        path: /etc/apt/sources.list.d/docker.list
+        state: absent
+      become: true
+      tags:
+        - docker
+        - cleanup
+
+    - name: Remove Docker GPG keyring
+      ansible.builtin.file:
+        path: /etc/apt/keyrings/docker.asc
+        state: absent
+      become: true
+      tags:
+        - docker
+        - cleanup
+
+    - name: Update APT package cache after cleanup
+      ansible.builtin.apt:
+        update_cache: true
+      become: true
+      tags:
+        - docker
+        - cleanup
+
+- name: Uninstall Docker for Archlinux
+  when:
+    - docker_cleanup | default(false) | bool
+    - ansible_os_family == "Archlinux"
+  block:
+    - name: Uninstall Docker and related packages
+      ansible.builtin.package:
+        name:
+          - docker
+          - docker-compose
+        state: absent
+        purge: true
+      become: true
+      tags:
+        - docker
+        - cleanup
 
 - name: Remove Docker data directories
   ansible.builtin.file:
@@ -42,91 +87,76 @@
     - docker
     - cleanup
 
-- name: Remove Docker repository source list
-  ansible.builtin.file:
-    path: /etc/apt/sources.list.d/docker.list
-    state: absent
-  become: true
-  when: docker_cleanup | default(false) | bool
-  tags:
-    - docker
-    - cleanup
-
-- name: Remove Docker GPG keyring
-  ansible.builtin.file:
-    path: /etc/apt/keyrings/docker.asc
-    state: absent
-  become: true
-  when: docker_cleanup | default(false) | bool
-  tags:
-    - docker
-    - cleanup
-
-- name: Update APT package cache after cleanup
-  ansible.builtin.apt:
-    update_cache: true
-  become: true
-  when: docker_cleanup | default(false) | bool
-  tags:
-    - docker
-    - cleanup
-
 # End cleanup tasks - below are installation tasks
 - name: End playbook execution if cleanup was performed
   ansible.builtin.meta: end_play
   when: docker_cleanup | default(false) | bool
 
-- name: Install required packages for Docker repository
-  ansible.builtin.apt:
-    name:
-      - ca-certificates
-      - curl
-    state: present
-  become: true
+- name: Install Docker for Debian/Ubuntu
+  when: ansible_pkg_mgr == "apt"
+  block:
+    - name: Install required packages for Docker repository
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - curl
+        state: present
+      become: true
 
-- name: Create keyrings directory
-  ansible.builtin.file:
-    path: /etc/apt/keyrings
-    state: directory
-    mode: "0755"
-  become: true
+    - name: Create keyrings directory
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "0755"
+      become: true
 
-- name: Download Docker's official GPG key
-  ansible.builtin.get_url:
-    url: https://download.docker.com/linux/debian/gpg
-    dest: /etc/apt/keyrings/docker.asc
-    mode: "0644"
-  become: true
+    - name: Download Docker's official GPG key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/debian/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: "0644"
+      become: true
 
-- name: Get system architecture
-  ansible.builtin.command: dpkg --print-architecture
-  register: docker_system_arch
-  changed_when: false
+    - name: Get system architecture
+      ansible.builtin.command: dpkg --print-architecture
+      register: docker_system_arch
+      changed_when: false
 
-- name: Add Docker repository to Apt sources
-  ansible.builtin.copy:
-    dest: /etc/apt/sources.list.d/docker.list
-    content: >
-      deb [arch={{ docker_system_arch.stdout }} signed-by=/etc/apt/keyrings/docker.asc]
-      https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
-    mode: "0644"
-  become: true
+    - name: Add Docker repository to Apt sources
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/docker.list
+        content: >
+          deb [arch={{ docker_system_arch.stdout }} signed-by=/etc/apt/keyrings/docker.asc]
+          https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+        mode: "0644"
+      become: true
 
-- name: Update APT package cache after adding Docker repository
-  ansible.builtin.apt:
-    update_cache: true
-  become: true
+    - name: Update APT package cache after adding Docker repository
+      ansible.builtin.apt:
+        update_cache: true
+      become: true
 
-- name: Install Docker engine and CLI
-  ansible.builtin.apt:
-    name:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-      - docker-buildx-plugin
-      - docker-compose-plugin
-    state: present
-  become: true
+    - name: Install Docker engine and CLI
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+      become: true
+
+- name: Install Docker for Archlinux
+  when: ansible_os_family == "Archlinux"
+  block:
+    - name: Install Docker and Docker Compose
+      ansible.builtin.package:
+        name:
+          - docker
+          - docker-compose
+        state: present
+      become: true
 
 - name: Add project user to docker group
   ansible.builtin.user:

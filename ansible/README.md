@@ -74,3 +74,5 @@ Override with `-e` or by editing the appropriate `group_vars`.
 - ArgoCD : https://argo-cd.readthedocs.io/en/stable/getting_started/
 
 - Kubernetes Schemas: https://github.com/yannh/kubernetes-json-schema/tree/master
+- Kubernetes Dashboard: https://github.com/kubernetes/dashboard
+  - Kubernetes Dashboard Best Practices: https://spacelift.io/blog/kubernetes-dashboard

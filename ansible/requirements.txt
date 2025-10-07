@@ -3,6 +3,7 @@
 # pip install -r ansible/requirements.txt
 
 # Python deps to run Ansible locally for k3d
+pyyaml
 ansible
 ansible-lint
 

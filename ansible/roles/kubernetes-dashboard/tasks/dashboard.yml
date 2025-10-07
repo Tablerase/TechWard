@@ -1,0 +1,45 @@
+# Dashboard: https://github.com/kubernetes/dashboard
+- name: Add kubernetes-dashboard Helm repo
+  kubernetes.core.helm_repository:
+    name: kubernetes-dashboard
+    repo_url: https://kubernetes.github.io/dashboard/
+  tags:
+    - kubernetes
+    - dashboard
+
+- name: Update Helm repositories (dashboard)
+  ansible.builtin.command: helm repo update
+  changed_when: false
+  tags:
+    - kubernetes
+    - dashboard
+
+- name: Deploy/Upgrade Kubernetes Dashboard
+  kubernetes.core.helm:
+    name: kubernetes-dashboard
+    chart_ref: kubernetes-dashboard/kubernetes-dashboard
+    release_namespace: "{{ kubernetes_dashboard_namespace }}"
+    create_namespace: true
+    wait: true
+    # Doc values: https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml
+    # Args: https://github.com/kubernetes/dashboard/blob/master/docs/common/arguments.md
+    # TODO: Fix http failure when trying to login (CSRF token issue?), (internal HTTP->HTTPS redirection issue), etc.
+    values:
+      api:
+        containers:
+          args:
+            # TODO: Enable CSRF protection when Dashboard is accessible via Ingress with HTTPS
+            - --disable-csrf-protection=true
+  tags:
+    - kubernetes
+    - dashboard
+
+- name: Ingress Kubernetes Dashboard
+  kubernetes.core.k8s:
+    src: "files/kubernetes-dashboard-ingress.yml"
+    state: present
+  register: kubernetes_dashboard_ingress
+  tags:
+    - kubernetes
+    - dashboard
+    - ingress

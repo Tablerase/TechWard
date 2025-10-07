@@ -9,9 +9,7 @@
   tags:
     - kubernetes
     - helm
-
-- name: Include Kubernetes Dashboard installation tasks
-  include_tasks: dashboard.yml
-  tags:
-    - kubernetes
-    - dashboard
+# - name: Include Kubernetes Dashboard installation tasks
+#   include_tasks: dashboard.yml
+#   tags:
+#     - kubernetes-dashboard

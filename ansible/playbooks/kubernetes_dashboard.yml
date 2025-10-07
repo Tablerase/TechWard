@@ -1,0 +1,7 @@
+- name: Deploy Kubernetes dashboard
+  hosts: all
+  become: true
+  vars:
+    kubernetes_dashboard_namespace: kubernetes-dashboard
+  roles:
+    - role: kubernetes-dashboard

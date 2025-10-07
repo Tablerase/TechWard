@@ -1,16 +1,5 @@
-- name: Update APT package cache
-  ansible.builtin.apt:
-    update_cache: true
-    cache_valid_time: 3600
-  become: true
-  register: common_apt_update_result
-  failed_when: false
-  tags:
-    - packages
-    - update
-
-- name: Install required packages
-  ansible.builtin.apt:
+- name: Update package cache and install required packages
+  ansible.builtin.package:
     name:
       - python3-pip
       - apt-transport-https
@@ -19,11 +8,24 @@
       - software-properties-common
       - gnupg
     state: present
+    update_cache: true
   become: true
-  register: common_apt_install_result
+  when: ansible_pkg_mgr == "apt"
   tags:
     - packages
-    - install
+
+- name: Install required packages for Arch Linux
+  ansible.builtin.package:
+    name:
+      - python-pip
+      - ca-certificates
+      - curl
+      - gnupg
+    state: present
+  become: true
+  when: ansible_os_family == "Archlinux"
+  tags:
+    - packages
 
 - name: Create a user for the project
   ansible.builtin.user:

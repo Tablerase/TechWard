@@ -95,6 +95,8 @@
   ansible.builtin.command: kubectl get nodes
   become: true
   become_user: "{{ project_user }}"
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
   environment:
     KUBECONFIG: "/home/{{ project_user }}/.kube/config"
   register: kubectl_test

@@ -8,6 +8,8 @@ import routes from "@routes/index";
 config(); // Loads env var
 const PORT = process.env.PORT || 3000;
 
+console.log(`CORS allowed origins: ${process.env.ALLOWED_ORIGINS || "not set"}`);
+
 // Express
 const app = express();
 app.use(cors(getCorsOptions()));
@@ -15,7 +17,7 @@ app.use(express.json());
 
 // Health route
 app.get("/health", (req, res) => {
-  res.json({ status: "ok" });
+  res.json({ status: "ok" })
 });
 
 // All routes

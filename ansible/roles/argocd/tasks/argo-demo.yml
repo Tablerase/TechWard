@@ -1,0 +1,45 @@
+- name: Create ArgoCD demo namespace
+  ansible.builtin.k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ argocd_demo_namespace }}"
+    state: present
+  tags:
+    - argocd
+    - argo-demo
+
+# https://argo-cd.readthedocs.io/en/latest/user-guide/application-specification/
+- name: Deploy ArgoCD demo application
+  ansible.builtin.k8s:
+    api_version: argoproj.io/v1alpha1
+    kind: Application
+    name: "{{ argocd_demo_application_name }}"
+    namespace: "{{ argocd_namespace | default('argocd') }}"
+    state: present
+    definition:
+      metadata:
+        name: "{{ argocd_demo_application_name }}"
+        namespace: "{{ argocd_namespace | default('argocd') }}"
+        labels:
+          # ensure ArgoCD will watch this Application object
+          argocd.argoproj.io/instance: "{{ argocd_instance_name | default('argocd') }}"
+      spec:
+        project: default
+        source:
+          repoURL: "{{ argocd_demo_application_repo_url }}"
+          targetRevision: HEAD
+          path: "{{ argocd_demo_application_path }}"
+        destination:
+          # use in-cluster API server if this targets the same cluster as ArgoCD
+          server: "{{ argocd_demo_application_server | default('https://kubernetes.default.svc') }}"
+          namespace: "{{ argocd_demo_namespace }}"
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
+  register: argo_app_result
+  tags:
+    - argocd
+    - argo-demo
+
+- debug: var=argo_app_result

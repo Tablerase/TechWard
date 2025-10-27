@@ -5,6 +5,10 @@
 - start: Runs the bundled server.
 - test: Runs Jest with ts-jest and alias support.
 
+## Setup
+
+Create a .env with .env.example
+
 ## Try it
 
 ```bash

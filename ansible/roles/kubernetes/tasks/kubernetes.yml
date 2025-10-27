@@ -64,13 +64,21 @@
       become: true
 
 - name: Install kubectl for Archlinux
-  when: ansible_os_family == "Archlinux"
+  when: ansible_pkg_mgr == "pacman"
   block:
+    - name: Update pacman package database
+      ansible.builtin.pacman:
+        update_cache: true
+      become: true
+
     - name: Install kubectl
-      ansible.builtin.package:
+      ansible.builtin.pacman:
         name: kubectl
         state: present
       become: true
+  tags:
+    - kubernetes
+    - installation
 
 - name: Verify kubectl installation
   ansible.builtin.command: kubectl version --client

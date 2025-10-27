@@ -1,6 +1,6 @@
 # 🏥 The Tech Ward – A Fullstack Portfolio Project
 
-## 📌 Overview
+## Overview
 
 This project is a portfolio showcase that uses the analogy of a hospital ward to demonstrate my skills in:
 
@@ -16,7 +16,7 @@ This project is a portfolio showcase that uses the analogy of a hospital ward to
 
 Each room in the hospital represents a technical skill or service, and each patient problem represents a real-world engineering challenge to solve.
 
-## 📌 Project Planning
+## Project Planning
 
 For this project, I will try to follows/learn an agile-style workflow using GitHub Projects.
 
@@ -24,7 +24,7 @@ For this project, I will try to follows/learn an agile-style workflow using GitH
 - Project board tracks To Do → In Progress → Done.
 - Milestones group iterations (MVP, Monitoring, Alerts...).
 
-👉 You can follow the progress here:
+You can follow the progress here:
 
 - Project Board: **https://github.com/users/Tablerase/projects/4/**
 - Milestones: **https://github.com/Tablerase/Portfolio/milestones**

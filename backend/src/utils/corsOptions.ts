@@ -14,7 +14,7 @@ export function getCorsOptions(): CorsOptions {
         return callback(null, true);
       }
 
-      console.warn(`❌ CORS blocked request from: ${origin}`);
+      console.warn(`CORS blocked request from: ${origin}`);
       return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,

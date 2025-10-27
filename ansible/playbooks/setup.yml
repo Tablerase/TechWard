@@ -8,7 +8,11 @@
     - role: k3d
     - role: kubernetes
 
-- import_playbook: traefik.yml
-- import_playbook: kubernetes_dashboard.yml
-- import_playbook: whoami.yml
-- import_playbook: argocd.yml
+- name: Services setup
+  hosts: all
+  become: true
+  roles:
+    - role: traefik
+    - role: whoami
+    - role: argocd
+    # - role: kubernetes_dashboard

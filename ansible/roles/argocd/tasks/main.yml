@@ -152,7 +152,7 @@
   register: argocd_cli_login
   changed_when: "'successfully logged in' in argocd_cli_login.stdout.lower()"
   retries: 3
-  delay: 5
+  delay: 10
   until: argocd_cli_login is succeeded
   tags:
     - argocd

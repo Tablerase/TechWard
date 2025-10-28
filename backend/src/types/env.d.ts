@@ -32,5 +32,10 @@ declare namespace NodeJS {
      * @example 'http://localhost:5173,http://example.com'
      */
     ALLOWED_ORIGINS: string;
+
+    GITHUB_BOT_USERNAME: string;
+    GITHUB_BOT_PERSONAL_ACCESS_TOKEN: string;
+    GITHUB_REPO_OWNER: string;
+    GITHUB_REPO_NAME: string;
   }
 }

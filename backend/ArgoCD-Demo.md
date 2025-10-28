@@ -11,13 +11,24 @@
   - Use separate github account (not main) to avoid security issues.
   - Go to Settings → Developer settings → Personal access tokens.
     - https://github.com/settings/tokens
+    - ensure write access: https://github.com/TechCareGiver/tech-ward-argocd-demo/settings/access
   - Generate token.
   - Grant repo:public_repo (for public) or repo (for private) access.
   - Store it securely (e.g., in environment variable in backend).
 
+- WebHook for fast update
+  - Go to GitHub repo webhook and setup argo cd according to doc
+    - https://github.com/TechCareGiver/tech-ward-argocd-demo/settings/hooks
+    - https://argo-cd.readthedocs.io/en/latest/operator-manual/webhook/
+
 ## Backend setup
 
 Use the token for authentication when committing and pushing changes automatically.
+
+## Tools
+
+SimpleGit - for git repository update: https://github.com/steveukx/git-js
+Yaml - parser to use / update yaml file: https://github.com/eemeli/yaml/
 
 ## Architecture Diagram
 

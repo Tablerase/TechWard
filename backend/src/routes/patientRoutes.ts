@@ -5,6 +5,7 @@ import {
   updateProblemStatus,
   getPatientHealth,
   getPatient,
+  resolveProblem,
 } from "@models/patients";
 
 const router = Router();
@@ -26,11 +27,12 @@ router.get("/:id/", (req, res) => {
 
 router.post("/:id/problems", (req, res) => {
   const { id } = req.params;
-  const { description } = req.body;
+  const { description, type } = req.body;
   const newProblem = {
     id: Date.now().toString(),
     description,
     status: "serious" as const,
+    type: 'default' as const, // Custom type like argo shouldnt be created by users
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -39,12 +41,24 @@ router.post("/:id/problems", (req, res) => {
   res.json(added);
 });
 
-router.patch("/:id/problems/:problemId", (req, res) => {
+router.patch("/:id/problems/:problemId", async (req, res) => {
   const { id, problemId } = req.params;
   const { status } = req.body;
   const updated = updateProblemStatus(id, problemId, status);
   if (!updated) return res.status(404).json({ error: "Problem not found" });
   res.json(updated);
+});
+
+router.post("/:id/problems/:problemId/resolve", async (req, res) => {
+  const { id, problemId } = req.params;
+  try {
+    const updated = await resolveProblem(id, problemId);
+    if (!updated) return res.status(404).json({ error: "Problem not found" });
+    res.json(updated);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to resolve problem" });
+  }
 });
 
 export default router;

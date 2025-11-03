@@ -2,8 +2,7 @@ import express from "express";
 import { config } from "dotenv";
 import cors from "cors";
 import { getCorsOptions } from "@utils/corsOptions";
-import routes from "@routes/index";
-import { updateDeployment } from "@utils/argocdDemo/updateDeployment";
+import routes from "@routes/index.routes";
 
 // Config
 config(); // Loads env var
@@ -24,21 +23,6 @@ app.get("/health", (req, res) => {
 // All routes
 app.use("/", routes);
 
-app.post("/update-app", async (req, res) => {
-  const { tag } = req.body as { tag?: string };
-
-  if (!tag) {
-    return res.status(400).json({ error: "Missing 'tag' in request body" });
-  }
-
-  try {
-    await updateDeployment(tag);
-    res.json({ status: "success", message: `Updated image to ${tag}` });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ status: "error", error: (err as Error).message });
-  }
-});
 
 app.listen(PORT, () => {
   console.log(

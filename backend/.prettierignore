@@ -1,2 +1,7 @@
 dist
 coverage
+public
+node_modules
+build
+dist-ssr
+.vscode

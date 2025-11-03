@@ -11,7 +11,8 @@
   - Use separate github account (not main) to avoid security issues.
   - Go to Settings → Developer settings → Personal access tokens.
     - https://github.com/settings/tokens
-    - ensure write access: https://github.com/TechCareGiver/tech-ward-argocd-demo/settings/access
+    - ensure write access:
+      https://github.com/TechCareGiver/tech-ward-argocd-demo/settings/access
   - Generate token.
   - Grant repo:public_repo (for public) or repo (for private) access.
   - Store it securely (e.g., in environment variable in backend).
@@ -23,12 +24,17 @@
 
 ## Backend setup
 
-Use the token for authentication when committing and pushing changes automatically.
+Use the token for authentication when committing and pushing changes
+automatically.
 
 ## Tools
 
-SimpleGit - for git repository update: https://github.com/steveukx/git-js
-Yaml - parser to use / update yaml file: https://github.com/eemeli/yaml/
+SimpleGit - for git repository update: https://github.com/steveukx/git-js Yaml -
+parser to use / update yaml file: https://github.com/eemeli/yaml/
+Kubernetes-client:
+
+- https://github.com/kubernetes-client/javascript
+- https://kubernetes-client.github.io/javascript/modules.html
 
 ## Architecture Diagram
 
@@ -62,19 +68,19 @@ flowchart TD;
   end
 
   backend bcommit@-->|"Commit & Push <br>predefined changes"| git_repo
-  backend btrigger@-->|"Trigger ArgoCD Sync API"| argo_svc
 
   subgraph "External"
-    subgraph git_repo["Git Repo"]
+    subgraph git_repo["Github Repo"]
       manifestD@{shape: doc, label: "deployment.yaml"}
       manifestS@{shape: doc, label: "service.yaml"}
       manifestI@{shape: doc, label: "ingress.yaml"}
     end
   end
+  git_repo btrigger@-->|"Webhook Trigger ArgoCD Sync API<br>*fast update*"| argo_svc
 
   app_deployment appdeppod@--> app_pod
 
-  git_repo gitargo@-->|"Sync<br>Watches for changes"|argo_pods
+  git_repo gitargo@-->|"Sync<br>Watches for changes<br>*3 min delay*"|argo_svc
   argo_pods argodep@-->|"Applies manifests"|app_deployment
   argo_pods argosvc@-->|"Applies manifests"|app_svc
   argo_pods argoin@-->|"Applies manifests"|app_ingress

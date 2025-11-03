@@ -8,6 +8,8 @@
     - argocd
     - argo-demo
 
+# TODO: Add argocd webhook for the argo demo app repo (Github,...)
+
 # https://argo-cd.readthedocs.io/en/latest/user-guide/application-specification/
 - name: Deploy ArgoCD demo application
   ansible.builtin.k8s:

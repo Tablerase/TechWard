@@ -10,7 +10,7 @@ export const PatientRoom = () => {
   useEffect(() => {
     (async () => {
       try {
-        const data = await getPatientById("1");
+        const data = await getPatientById("2");
         setPatient(data);
       } catch (err) {
         console.error("Error while fetching patient", err);

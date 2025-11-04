@@ -1,4 +1,4 @@
-import * as k8s from '@kubernetes/client-node'
+import * as k8s from "@kubernetes/client-node";
 
 function getKubeConfig() {
   const kc = new k8s.KubeConfig();
@@ -10,13 +10,13 @@ function getKubeConfig() {
 
   if (isInCluster) {
     kc.loadFromCluster();
-    console.log("KC running in-cluster")
+    console.log("KC running in-cluster");
   } else {
     kc.loadFromDefault();
-    console.log("KC running from local")
+    console.log("KC running from local");
   }
 
-  return kc
+  return kc;
 }
 
 // TODO: in prod add RBAC kubernetes to backend app
@@ -68,9 +68,19 @@ const kc = getKubeConfig();
 // Doc: https://kubernetes-client.github.io/javascript/classes/AppsV1Api.html
 const appsV1Api = kc.makeApiClient(k8s.AppsV1Api);
 
-export async function getDeploymentImage(namespace: string, deploymentName: string) {
-  const res = await appsV1Api.readNamespacedDeployment({ name: deploymentName, namespace: namespace });
+/** Retrieves the container image of a specified deployment in a namespace.
+ * @param namespace The namespace of the deployment.
+ * @param deploymentName The name of the deployment.
+ * @returns The container image string.
+ */
+export async function getDeploymentImage(
+  namespace: string,
+  deploymentName: string,
+) {
+  const res = await appsV1Api.readNamespacedDeployment({
+    name: deploymentName,
+    namespace: namespace,
+  });
   const image = res.spec?.template?.spec?.containers?.[0]?.image;
   return image;
 }
-

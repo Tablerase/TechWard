@@ -1,3 +1,4 @@
+import { ArgoProblem } from "@entity/argoProblem";
 import { Patient } from "@entity/patient";
 import { Problem } from "@entity/problem";
 
@@ -5,7 +6,7 @@ const patients: Patient[] = [
   {
     id: "1",
     name: "Claude Argo",
-    problems: [new Problem("p1", "Bandage soiled", "argo", "serious")],
+    problems: [new ArgoProblem("Bandage soiled")],
   },
   {
     id: "2",

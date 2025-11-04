@@ -1,10 +1,8 @@
 import { Patient } from "@entity/patient";
 import { Problem } from "@entity/problem";
 import { computePatientStatus } from "@utils/health";
-import { updateDeployment } from "@services/index";
+import { updateDeployment } from "@services/index.service";
 import * as patientsModel from "@models/patients.model";
-
-// TODO: : Add reset problem logic so when new user recover patients/patient the resolved problem can be reassigned
 
 
 export function getPatients() {
@@ -38,12 +36,7 @@ export async function resolveProblem(patientId: string, problemId: string) {
 
   if (!problem) { return null }
 
-  if (problem?.type === "argo") {
-    await updateDeployment();
-  }
-
-  problem?.resolve();
-  console.log(problem)
+  await problem?.resolve();
 
   return problem;
 }

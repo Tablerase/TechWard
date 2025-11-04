@@ -37,5 +37,19 @@ declare namespace NodeJS {
     GITHUB_BOT_PERSONAL_ACCESS_TOKEN: string;
     GITHUB_REPO_OWNER: string;
     GITHUB_REPO_NAME: string;
+
+    /**
+     * Argo Demo application name
+     *
+     * @example 'argo-demo'
+     */
+    ARGOCD_DEMO_APPLICATION_NAME: string;
+
+    /**
+     * Argo Demo namespace in which argo demo app is contained
+     *
+     * @example 'argocd-demo'
+     */
+    ARGOCD_DEMO_NAMESPACE: string;
   }
 }

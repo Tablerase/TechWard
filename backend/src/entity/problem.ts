@@ -42,6 +42,7 @@ export class Problem {
 
   /**
    * Check if the problem is available for assignment
+   *
    * Available means: not assigned and not resolved
    */
   isAvailable(): boolean {
@@ -73,7 +74,7 @@ export class Problem {
   /**
    * Resolve the problem and release from caregiver
    */
-  resolve(): void {
+  async resolve(): Promise<void> {
     this.status = "resolved";
     this.release();
   }
@@ -99,6 +100,5 @@ export class Problem {
   reset(newStatus: ProblemStatus = "critical"): void {
     this.status = newStatus;
     this.release();
-    this.updatedAt = new Date();
   }
 }

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getDeploymentImage, updateDeployment } from "@services/index";
+import { getDeploymentImage, updateDeployment } from "@services/index.service";
 
 export async function updateAppController(req: Request, res: Response) {
   const { tag } = req.body as { tag?: string };

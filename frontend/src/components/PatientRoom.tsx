@@ -1,35 +1,74 @@
-import { Patient } from "@/types";
-import { useProblemToggle } from "@hooks/useProblemToggle";
-import { getPatientById } from "@services/patientService";
 import { useEffect, useMemo, useState } from "react";
 import "./PatientRoom.css";
+import { useSocket } from "@/hooks/useSocket";
+import { WardEvents } from "@/types/socket.events";
 
 export const PatientRoom = () => {
-  const [patient, setPatient] = useState<Patient | null>(null);
+  const { wardSocket, wardPatients } = useSocket();
 
+  // Get the first patient and first problem for visualization
+  const patient = wardPatients?.patients[0] ?? null;
+  const problem = patient?.problems[0] ?? null;
+  const [loading, setLoading] = useState(false);
+
+  const status = problem?.status ?? "critical";
+
+  // Update problem status with next status
+  const toggleStatus = async () => {
+    if (!problem || !wardSocket || !patient) return;
+
+    setLoading(true);
+
+    const statusSequence: Array<
+      "critical" | "serious" | "stable" | "resolved"
+    > = ["critical", "serious", "stable", "resolved"];
+
+    const statusToCheck = status as
+      | "critical"
+      | "serious"
+      | "stable"
+      | "resolved";
+    const currentIndex = statusSequence.indexOf(statusToCheck);
+    const nextStatus =
+      statusSequence[(currentIndex + 1) % statusSequence.length];
+
+    wardSocket.emit(WardEvents.UPDATE_PROBLEM, {
+      patientId: patient.id,
+      problemId: problem.id,
+      status: nextStatus,
+    });
+
+    // Loading will be cleared when we receive the updated patients list
+  };
+
+  // Clear loading state when patients update
   useEffect(() => {
-    (async () => {
-      try {
-        const data = await getPatientById("2");
-        setPatient(data);
-      } catch (err) {
-        console.error("Error while fetching patient", err);
-      }
-    })();
-  }, []);
-
-  const firstProblem = patient?.problems?.[0] ?? null;
-
-  const { status, loading, toggleStatus } = useProblemToggle({
-    patientId: patient?.id ?? "1",
-    problemId: firstProblem?.id ?? "p1",
-    initialStatus: firstProblem?.status ?? "critical",
-  });
+    setLoading(false);
+  }, [wardPatients]);
 
   const roomClass = useMemo(
     () => (status === "resolved" ? "healthy" : status),
     [status]
   );
+
+  if (!patient || !problem) {
+    return (
+      <svg width="500" height="500">
+        <rect
+          className="room critical"
+          x="5"
+          y="5"
+          width="490"
+          height="490"
+          rx="10"
+          ry="10"
+        />
+        <text x="250" y="250" textAnchor="middle" fontSize="24" fill="white">
+          Loading patients...
+        </text>
+      </svg>
+    );
+  }
 
   return (
     <svg width="500" height="500">
@@ -48,7 +87,6 @@ export const PatientRoom = () => {
         id="textCurve"
         d="M 50, 150 C 200, 100 300, 50 450, 100"
         fill="transparent"
-        // stroke="yellow"
         strokeWidth={2}
       />
       <text
@@ -69,7 +107,7 @@ export const PatientRoom = () => {
             dur="10s"
             repeatCount="indefinite"
           />
-          {loading ? "" : patient?.name}
+          {loading ? "" : patient.name}
         </textPath>
       </text>
       <foreignObject x="190" y="200" width="150" height="120">
@@ -81,12 +119,12 @@ export const PatientRoom = () => {
             height: "100%",
           }}
         >
-          <button onClick={toggleStatus} disabled={loading}>
+          <button onClick={toggleStatus} disabled={loading || !wardSocket}>
             {loading
               ? "Updating..."
               : status === "resolved"
-                ? "Mark Critical"
-                : "Resolve Problem"}
+              ? "Mark Critical"
+              : `Next Status (${status})`}
           </button>
         </div>
       </foreignObject>

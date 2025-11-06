@@ -13,7 +13,8 @@
       "@models/*": ["src/models/*"],
       "@routes/*": ["src/routes/*"],
       "@utils/*": ["src/utils/*"],
-      "@services/*": ["src/services/*"]
+      "@services/*": ["src/services/*"],
+      "@types/*": ["src/types/*"]
     },
 
     // Environment Settings

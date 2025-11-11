@@ -40,7 +40,7 @@ export function updateProblemStatus(
   const problem = patient.problems.find((pr) => pr.id === problemId);
   if (!problem) return null;
 
-  problem.status = newStatus;
-  problem.updatedAt = new Date();
+  // Use Problem class method to update status
+  problem.updateStatus(newStatus);
   return problem;
 }

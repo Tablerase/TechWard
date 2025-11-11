@@ -87,14 +87,28 @@ export function registerWardHandlers(socket: WardSocket) {
   socket.on(WardEvents.DISCONNECT, () => {
     const currentSession = getSession(socket.id);
     if (currentSession) {
-      markSessionDisconnected(socket.id);
+      // Release all problems assigned to this caregiver
+      releaseCaregiversProblems(currentSession.caregiverId);
+
+      // Broadcast to all clients in the room that caregiver left
       socket.to(currentSession.lastRoom).emit(WardEvents.CAREGIVER_LEFT, {
         id: socket.id,
         name: currentSession.caregiverName,
       } as WardEventData.CaregiverLeft);
 
-      // Release all problems assigned to this caregiver
-      releaseCaregiversProblems(socket.id);
+      // Send updated patients list to all remaining clients in the room
+      // This ensures they see that problems are no longer assigned
+      const wardPatients = getWardPatients();
+      socket
+        .to(currentSession.lastRoom)
+        .emit(WardEvents.WARD_PATIENTS, wardPatients);
+
+      // Mark session as disconnected
+      markSessionDisconnected(socket.id);
+
+      console.log(
+        `[WARD] Caregiver ${currentSession.caregiverName.firstName} ${currentSession.caregiverName.lastName} disconnected and all assignments released`,
+      );
     }
   });
 
@@ -115,7 +129,7 @@ export function registerWardHandlers(socket: WardSocket) {
     const result = assignProblem(
       data.patientId,
       data.problemId,
-      socket.id,
+      currentSession.caregiverId,
       currentSession.caregiverName,
     );
 
@@ -144,7 +158,7 @@ export function registerWardHandlers(socket: WardSocket) {
       const result = resolveProblem(
         data.patientId,
         data.problemId,
-        socket.id,
+        currentSession.caregiverId,
         currentSession.caregiverName,
       );
 
@@ -173,7 +187,7 @@ export function registerWardHandlers(socket: WardSocket) {
       data.patientId,
       data.problemId,
       data.status,
-      socket.id,
+      currentSession.caregiverId,
       currentSession.caregiverName,
     );
 

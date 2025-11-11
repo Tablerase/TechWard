@@ -5,8 +5,6 @@
  * where caregivers can see and manage patient problems.
  */
 
-// TODO: install tailwind css
-
 import { useSocket } from "@/hooks/useSocket";
 import {
   WardEvents,
@@ -196,10 +194,10 @@ export function WardDashboard() {
                             patient.id,
                             problem.id,
                             e.target.value as
-                            | "critical"
-                            | "serious"
-                            | "stable"
-                            | "resolved"
+                              | "critical"
+                              | "serious"
+                              | "stable"
+                              | "resolved"
                           )
                         }
                         className="px-2 py-1 border rounded text-sm"

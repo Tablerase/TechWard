@@ -5,26 +5,9 @@
  * Handles assignment tracking, status updates, and broadcast notifications.
  */
 
-import {
-  getPatients,
-  getPatient,
-  updateProblemStatus,
-} from "@models/patients.model";
+import { getPatients, getPatient } from "@models/patients.model";
 import { WardEventData } from "../types/socket.events";
-
-//  TODO: replace temporary problem by Problem Class
-
-/** Track which caregiver is assigned to which problem */
-interface ProblemAssignment {
-  caregiverId: string;
-  caregiverName: {
-    firstName: string;
-    lastName: string;
-  };
-  assignedAt: Date;
-}
-
-const problemAssignments = new Map<string, ProblemAssignment>(); // Key: `${patientId}:${problemId}`
+import * as caregiversService from "@services/caregivers.service";
 
 /**
  * Get all patients for the ward with serialized data
@@ -35,28 +18,22 @@ export function getWardPatients(): WardEventData.WardPatients {
   const serializedPatients = patients.map((patient) => ({
     id: patient.id,
     name: patient.name,
-    problems: patient.problems.map((problem) => {
-      const assignmentKey = `${patient.id}:${problem.id}`;
-      const assignment = problemAssignments.get(assignmentKey);
-
-      return {
-        id: problem.id,
-        description: problem.description,
-        status: problem.status as
-          | "critical"
-          | "serious"
-          | "stable"
-          | "resolved",
-        ...(assignment && {
-          assignedTo: {
-            caregiverId: assignment.caregiverId,
-            caregiverName: assignment.caregiverName,
+    problems: patient.problems.map((problem) => ({
+      id: problem.id,
+      description: problem.description,
+      status: problem.status as "critical" | "serious" | "stable" | "resolved",
+      ...(problem.assignedCaregiver && {
+        assignedTo: {
+          caregiverId: problem.assignedCaregiver.id,
+          caregiverName: {
+            firstName: problem.assignedCaregiver.firstname,
+            lastName: problem.assignedCaregiver.lastname,
           },
-        }),
-        createdAt: problem.createdAt.toISOString(),
-        updatedAt: problem.updatedAt.toISOString(),
-      };
-    }),
+        },
+      }),
+      createdAt: problem.createdAt.toISOString(),
+      updatedAt: problem.updatedAt.toISOString(),
+    })),
   }));
 
   return { patients: serializedPatients };
@@ -80,18 +57,24 @@ export function assignProblem(
   const problem = patient.problems.find((p) => p.id === problemId);
   if (!problem) return null;
 
-  // Check if problem is already assigned
-  const assignmentKey = `${patientId}:${problemId}`;
-  if (problemAssignments.has(assignmentKey)) {
-    return null; // Already assigned
+  // Check if problem is available for assignment
+  if (!problem.isAvailable()) {
+    return null; // Already assigned or resolved
   }
 
-  // Record the assignment
-  problemAssignments.set(assignmentKey, {
-    caregiverId,
-    caregiverName,
-    assignedAt: new Date(),
-  });
+  // Get or create caregiver
+  const caregiver = caregiversService.getCaregiver(caregiverId);
+  if (!caregiver) {
+    console.error(`[Problem] Caregiver ${caregiverId} not found`);
+    return null;
+  }
+
+  try {
+    problem.assignTo(caregiver);
+  } catch (error) {
+    console.error(`[Problem] Failed to assign problem ${problemId}:`, error);
+    return null;
+  }
 
   console.log(
     `[Problem] Problem ${problemId} assigned to ${caregiverName.firstName} ${caregiverName.lastName}`,
@@ -126,12 +109,8 @@ export function resolveProblem(
   const problem = patient.problems.find((p) => p.id === problemId);
   if (!problem) return null;
 
-  // Update problem status to resolved
-  updateProblemStatus(patientId, problemId, "resolved");
-
-  // Remove assignment
-  const assignmentKey = `${patientId}:${problemId}`;
-  problemAssignments.delete(assignmentKey);
+  // Resolve the problem using Problem class method
+  problem.resolve();
 
   console.log(
     `[Problem] Problem ${problemId} resolved by ${caregiverName.firstName} ${caregiverName.lastName}`,
@@ -167,14 +146,8 @@ export function updateProblemStatusInWard(
   const problem = patient.problems.find((p) => p.id === problemId);
   if (!problem) return null;
 
-  // Update the problem
-  updateProblemStatus(patientId, problemId, newStatus);
-
-  // If resolved, unassign it
-  if (newStatus === "resolved") {
-    const assignmentKey = `${patientId}:${problemId}`;
-    problemAssignments.delete(assignmentKey);
-  }
+  // Update the problem using Problem class method
+  problem.updateStatus(newStatus);
 
   console.log(
     `[Problem] Problem ${problemId} status updated to ${newStatus} by ${caregiverName.firstName} ${caregiverName.lastName}`,
@@ -200,14 +173,19 @@ export function getCaregiversProblems(caregiverId: string): Array<{
   problemId: string;
 }> {
   const problems: Array<{ patientId: string; problemId: string }> = [];
+  const patients = getPatients();
 
-  for (const [key, assignment] of problemAssignments.entries()) {
-    if (assignment.caregiverId === caregiverId) {
-      const parts = key.split(":");
-      const patientId = parts[0];
-      const problemId = parts[1];
-      if (patientId && problemId) {
-        problems.push({ patientId, problemId });
+  for (const patient of patients) {
+    for (const problem of patient.problems) {
+      // Check if this problem is assigned to the specified caregiver
+      if (
+        problem.assignedCaregiver &&
+        problem.assignedCaregiver.id === caregiverId
+      ) {
+        problems.push({
+          patientId: patient.id,
+          problemId: problem.id,
+        });
       }
     }
   }
@@ -219,19 +197,25 @@ export function getCaregiversProblems(caregiverId: string): Array<{
  * Release all problems assigned to a caregiver (when they disconnect)
  */
 export function releaseCaregiversProblems(caregiverId: string): void {
-  const keysToDelete: string[] = [];
+  const patients = getPatients();
+  let releasedCount = 0;
 
-  for (const [key, assignment] of problemAssignments.entries()) {
-    if (assignment.caregiverId === caregiverId) {
-      keysToDelete.push(key);
+  for (const patient of patients) {
+    for (const problem of patient.problems) {
+      // Check if this problem is assigned to the specified caregiver
+      if (
+        problem.assignedCaregiver &&
+        problem.assignedCaregiver.id === caregiverId
+      ) {
+        problem.release();
+        releasedCount++;
+      }
     }
   }
 
-  keysToDelete.forEach((key) => problemAssignments.delete(key));
-
-  if (keysToDelete.length > 0) {
+  if (releasedCount > 0) {
     console.log(
-      `[Problem] Released ${keysToDelete.length} problem(s) from caregiver ${caregiverId}`,
+      `[Problem] Released ${releasedCount} problem(s) from caregiver ${caregiverId}`,
     );
   }
 }

@@ -1,8 +1,10 @@
 import { User } from "@entity/user";
+import * as caregiversService from "@services/caregivers.service";
 
 interface ClientSession {
   socketId: string;
   userId: string;
+  caregiverId: string;
   caregiverName: {
     firstName: string;
     lastName: string;
@@ -56,13 +58,21 @@ export function createOrRestoreSession(
     return { session: restoredSession, isNewClient: false };
   }
 
+  // Create or get caregiver for this user
+  const caregiver = caregiversService.addCaregiver(
+    user.id,
+    user.firstName,
+    user.lastName,
+  );
+
   // Create new session for first-time or expired client
   const newSession: ClientSession = {
     socketId,
     userId: user.id,
+    caregiverId: caregiver.id,
     caregiverName: {
-      firstName: user.firstName,
-      lastName: user.lastName,
+      firstName: caregiver.firstname,
+      lastName: caregiver.lastname,
     },
     lastRoom: DEFAULT_ROOM,
     connectedAt: now,

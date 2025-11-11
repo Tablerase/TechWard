@@ -5,7 +5,7 @@ declare namespace NodeJS {
      * - 'dev' for development
      * - 'prod' for production
      */
-    NODE_ENV: 'dev' | 'prod';
+    NODE_ENV: "dev" | "prod";
 
     /**
      * The port the server will listen on.
@@ -28,7 +28,7 @@ declare namespace NodeJS {
      * Allowed origins for CORS.
      * - Use '*' to allow all origins.
      * - Or provide a comma-separated list of URLs.
-     * @example '*' 
+     * @example '*'
      * @example 'http://localhost:5173,http://example.com'
      */
     ALLOWED_ORIGINS: string;
@@ -51,5 +51,28 @@ declare namespace NodeJS {
      * @example 'argocd-demo'
      */
     ARGOCD_DEMO_NAMESPACE: string;
+
+    /**
+     * JWT secret for signing tokens
+     *
+     * @example 'your-super-secret-jwt-key-change-in-production'
+     */
+    JWT_SECRET: string;
+
+    /**
+     * JWT access token expiry time
+     *
+     * @default '15m'
+     * @example '15m', '1h', '7d'
+     */
+    JWT_ACCESS_EXPIRY?: string;
+
+    /**
+     * JWT refresh token expiry time
+     *
+     * @default '7d'
+     * @example '7d', '30d', '90d'
+     */
+    JWT_REFRESH_EXPIRY?: string;
   }
 }

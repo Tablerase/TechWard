@@ -278,6 +278,70 @@ const fetchData = async () => {
 };
 ```
 
+## WebSocket Authentication
+
+The WebSocket connection to the `/ward` namespace is also protected with JWT authentication.
+
+### Backend WebSocket Middleware
+
+When a client connects to the `/ward` namespace, the server verifies the JWT token:
+
+```typescript
+// backend/src/services/sockets/ward/index.ward.ts
+nsp.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+
+  if (!token) {
+    return next(new Error("Authentication error: No token provided"));
+  }
+
+  const decoded = AuthService.verifyAccessToken(token);
+  if (!decoded) {
+    return next(new Error("Authentication error: Invalid token"));
+  }
+
+  // Store user in socket.data for later use
+  socket.data.user = AuthService.getUserById(decoded.userId);
+  next();
+});
+```
+
+### Frontend WebSocket Connection
+
+The frontend sends the access token during the WebSocket handshake:
+
+```typescript
+// frontend/src/hooks/useSocket.ts
+const accessToken = localStorage.getItem("accessToken");
+
+const wardSocket = manager.socket("/ward", {
+  auth: {
+    token: accessToken,
+  },
+});
+```
+
+### Session Management
+
+- **Session ID**: Uses `userId` from JWT instead of IP address
+- **User Identity**: Caregiver name comes from authenticated user (from JWT)
+- **Session Persistence**: Users can reconnect with the same identity within 1 hour
+- **Persistent Connection**: Once authenticated, the WebSocket connection remains open until disconnect (no token refresh needed)
+
+### Connection Error Handling
+
+If the token is invalid or expired, the server will reject the connection:
+
+```typescript
+wardSocket.on("connect_error", (error) => {
+  if (error.message.includes("Authentication error")) {
+    console.error("JWT authentication failed. Please login again.");
+  }
+});
+```
+
+**Note**: WebSocket connections are persistent and do not require token refresh once established. The token is only verified during the initial handshake. If the connection drops, a new handshake with a valid token will be required.
+
 ## Troubleshooting
 
 ### "No valid session found" on auto-login

@@ -1,8 +1,8 @@
-import { funnyCaregiverNameGenerator } from "@utils/funnyCaregiverNames";
+import { User } from "@entity/user";
 
 interface ClientSession {
   socketId: string;
-  ip: string;
+  userId: string;
   caregiverName: {
     firstName: string;
     lastName: string;
@@ -15,7 +15,7 @@ interface ClientSession {
 // Store active sessions by socketId
 const activeSessions = new Map<string, ClientSession>();
 
-// Store inactive sessions by IP for rejoin detection
+// Store inactive sessions by userId for rejoin detection
 const inactiveSessions = new Map<string, ClientSession>();
 
 const SESSION_TIMEOUT = 60 * 60 * 1000; // 1 hour in milliseconds
@@ -27,10 +27,10 @@ const DEFAULT_ROOM = "default";
  */
 export function createOrRestoreSession(
   socketId: string,
-  ip: string,
+  user: User,
 ): { session: ClientSession; isNewClient: boolean } {
-  // Check if client has a recent inactive session
-  const inactiveSession = inactiveSessions.get(ip);
+  // Check if user has a recent inactive session
+  const inactiveSession = inactiveSessions.get(user.id);
   const now = Date.now();
 
   if (
@@ -47,10 +47,10 @@ export function createOrRestoreSession(
     delete (restoredSession as Partial<ClientSession>).lastDisconnectAt;
 
     activeSessions.set(socketId, restoredSession);
-    inactiveSessions.delete(ip);
+    inactiveSessions.delete(user.id);
 
     console.log(
-      `[Session] Client ${ip} rejoined as ${restoredSession.caregiverName.firstName} ${restoredSession.caregiverName.lastName}`,
+      `[Session] User ${user.id} rejoined as ${restoredSession.caregiverName.firstName} ${restoredSession.caregiverName.lastName}`,
     );
 
     return { session: restoredSession, isNewClient: false };
@@ -59,8 +59,11 @@ export function createOrRestoreSession(
   // Create new session for first-time or expired client
   const newSession: ClientSession = {
     socketId,
-    ip,
-    caregiverName: funnyCaregiverNameGenerator(),
+    userId: user.id,
+    caregiverName: {
+      firstName: user.firstName,
+      lastName: user.lastName,
+    },
     lastRoom: DEFAULT_ROOM,
     connectedAt: now,
   };
@@ -68,7 +71,7 @@ export function createOrRestoreSession(
   activeSessions.set(socketId, newSession);
 
   console.log(
-    `[Session] New client ${ip} assigned caregiver name: ${newSession.caregiverName.firstName} ${newSession.caregiverName.lastName}`,
+    `[Session] New client ${user.id} assigned caregiver name: ${newSession.caregiverName.firstName} ${newSession.caregiverName.lastName}`,
   );
 
   return { session: newSession, isNewClient: true };
@@ -98,11 +101,11 @@ export function markSessionDisconnected(socketId: string): void {
   const session = activeSessions.get(socketId);
   if (session) {
     session.lastDisconnectAt = Date.now();
-    inactiveSessions.set(session.ip, session);
+    inactiveSessions.set(session.userId, session);
     activeSessions.delete(socketId);
 
     console.log(
-      `[Session] Client ${session.ip} (${session.caregiverName.firstName} ${session.caregiverName.lastName}) disconnected - will be available for rejoin for 1 hour`,
+      `[Session] User ${session.userId} (${session.caregiverName.firstName} ${session.caregiverName.lastName}) disconnected - will be available for rejoin for 1 hour`,
     );
   }
 }
@@ -114,12 +117,12 @@ export function cleanupExpiredSessions(): void {
   const now = Date.now();
   let cleanedCount = 0;
 
-  for (const [ip, session] of inactiveSessions.entries()) {
+  for (const [userId, session] of inactiveSessions.entries()) {
     if (
       session.lastDisconnectAt &&
       now - session.lastDisconnectAt >= SESSION_TIMEOUT
     ) {
-      inactiveSessions.delete(ip);
+      inactiveSessions.delete(userId);
       cleanedCount++;
     }
   }

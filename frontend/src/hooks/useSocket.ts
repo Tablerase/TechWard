@@ -26,6 +26,14 @@ export function useSocket() {
   } | null>(null);
 
   useEffect(() => {
+    // Get access token from localStorage
+    const accessToken = localStorage.getItem("accessToken");
+
+    if (!accessToken) {
+      console.warn("No access token found, cannot connect to socket");
+      return;
+    }
+
     const manager = new Manager(SOCKET_URL, {
       reconnection: true,
       reconnectionDelay: 1000,
@@ -47,7 +55,12 @@ export function useSocket() {
 
     setMainSocket(mainSocket);
 
-    const rawWardSocket = manager.socket("/ward");
+    // Connect to /ward namespace with JWT authentication
+    const rawWardSocket = manager.socket("/ward", {
+      auth: {
+        token: accessToken,
+      },
+    });
     const typedWardSocket = asWardSocket(rawWardSocket);
 
     typedWardSocket.on(WardEvents.CONNECT, () => {
@@ -59,6 +72,14 @@ export function useSocket() {
 
     typedWardSocket.on(WardEvents.DISCONNECT, () => {
       console.log("⏸ Socket disconnected from /ward namespace");
+    });
+
+    // Listen for authentication errors
+    typedWardSocket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error.message);
+      if (error.message.includes("Authentication error")) {
+        console.error("JWT authentication failed. Please login again.");
+      }
     });
 
     typedWardSocket.on(
@@ -130,7 +151,7 @@ export function useSocket() {
       typedWardSocket.close();
       mainSocket.close();
     };
-  }, []);
+  }, []); // Empty dependency array - only connect once on mount
 
   return {
     mainSocket,

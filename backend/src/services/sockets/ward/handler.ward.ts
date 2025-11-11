@@ -18,16 +18,19 @@ import {
 } from "@services/wardPatient.service";
 
 export function registerWardHandlers(socket: WardSocket) {
-  // Get client IP from socket connection
-  const clientIp =
-    (socket.handshake.headers["x-forwarded-for"] as string)?.split(",")[0] ||
-    socket.handshake.address ||
-    "unknown";
+  // Get authenticated user from socket data (set by middleware)
+  const user = socket.data.user;
 
-  console.log(`[WARD] Processing connection for IP: ${clientIp}`);
+  if (!user) {
+    console.error(`[WARD] No authenticated user found for socket ${socket.id}`);
+    socket.disconnect();
+    return;
+  }
+
+  console.log(`[WARD] Processing connection for user: ${user.id}`);
 
   // Create or restore session when client connects to ward namespace
-  const { session, isNewClient } = createOrRestoreSession(socket.id, clientIp);
+  const { session, isNewClient } = createOrRestoreSession(socket.id, user);
 
   console.log(
     `[WARD] Session created: ${session.caregiverName.firstName} ${session.caregiverName.lastName} (new: ${isNewClient})`,

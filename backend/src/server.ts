@@ -15,11 +15,6 @@ console.log(
   `CORS allowed origins: ${process.env.ALLOWED_ORIGINS || "not set"}`,
 );
 
-// ! currently websocket ip id cause problem
-// TODO: replace session auth with ip by a generated token (no login needed) stored within client
-// TODO: do session generation during websocket handshake or by a simple auth route.
-// TODO: implement problem class to resolve problem currently websockets use an interface
-
 // Express
 const app = express();
 

@@ -52,6 +52,8 @@ export const WardEvents = {
   RESOLVE_PROBLEM: "problem:resolve",
   /** Broadcast when a problem is resolved */
   PROBLEM_RESOLVED: "problem:resolved",
+  /** Broadcast when a problem starts processing */
+  PROBLEM_PROCESSING: "problem:processing",
   /** Client updates problem status */
   UPDATE_PROBLEM: "problem:update",
   /** Broadcast when problem status is updated */
@@ -112,7 +114,7 @@ export namespace WardEventData {
       problems: {
         id: string;
         description: string;
-        status: "critical" | "serious" | "stable" | "resolved";
+        status: "critical" | "serious" | "stable" | "resolved" | "processing";
         assignedTo?: {
           caregiverId: string;
           caregiverName: {
@@ -122,6 +124,8 @@ export namespace WardEventData {
         };
         createdAt: string;
         updatedAt: string;
+        isLocked?: boolean;
+        lockedUntil?: string;
       }[];
     }[];
   }
@@ -166,18 +170,33 @@ export namespace WardEventData {
     timestamp: string;
   }
 
+  /** Broadcast when problem starts processing */
+  export interface ProblemProcessing {
+    patientId: string;
+    problemId: string;
+    processingBy: {
+      caregiverId: string;
+      caregiverName: {
+        firstName: string;
+        lastName: string;
+      };
+    };
+    timestamp: string;
+    message?: string;
+  }
+
   /** Client updates problem status */
   export interface UpdateProblem {
     patientId: string;
     problemId: string;
-    status: "critical" | "serious" | "stable" | "resolved";
+    status: "critical" | "serious" | "stable" | "resolved" | "processing";
   }
 
   /** Broadcast when problem status is updated */
   export interface ProblemUpdated {
     patientId: string;
     problemId: string;
-    newStatus: "critical" | "serious" | "stable" | "resolved";
+    newStatus: "critical" | "serious" | "stable" | "resolved" | "processing";
     updatedBy: {
       caregiverId: string;
       caregiverName: {
@@ -202,6 +221,9 @@ export interface WardServerEvents {
   [WardEvents.WARD_PATIENTS]: (data: WardEventData.WardPatients) => void;
   [WardEvents.PROBLEM_ASSIGNED]: (data: WardEventData.ProblemAssigned) => void;
   [WardEvents.PROBLEM_RESOLVED]: (data: WardEventData.ProblemResolved) => void;
+  [WardEvents.PROBLEM_PROCESSING]: (
+    data: WardEventData.ProblemProcessing,
+  ) => void;
   [WardEvents.PROBLEM_UPDATED]: (data: WardEventData.ProblemUpdated) => void;
 }
 

@@ -18,22 +18,40 @@ export function getWardPatients(): WardEventData.WardPatients {
   const serializedPatients = patients.map((patient) => ({
     id: patient.id,
     name: patient.name,
-    problems: patient.problems.map((problem) => ({
-      id: problem.id,
-      description: problem.description,
-      status: problem.status as "critical" | "serious" | "stable" | "resolved",
-      ...(problem.assignedCaregiver && {
-        assignedTo: {
-          caregiverId: problem.assignedCaregiver.id,
-          caregiverName: {
-            firstName: problem.assignedCaregiver.firstname,
-            lastName: problem.assignedCaregiver.lastname,
+    problems: patient.problems.map((problem) => {
+      const serialized: any = {
+        id: problem.id,
+        description: problem.description,
+        status: problem.status as
+          | "critical"
+          | "serious"
+          | "stable"
+          | "resolved"
+          | "processing",
+        ...(problem.assignedCaregiver && {
+          assignedTo: {
+            caregiverId: problem.assignedCaregiver.id,
+            caregiverName: {
+              firstName: problem.assignedCaregiver.firstname,
+              lastName: problem.assignedCaregiver.lastname,
+            },
           },
-        },
-      }),
-      createdAt: problem.createdAt.toISOString(),
-      updatedAt: problem.updatedAt.toISOString(),
-    })),
+        }),
+        createdAt: problem.createdAt.toISOString(),
+        updatedAt: problem.updatedAt.toISOString(),
+      };
+
+      // Add lock information if the problem is locked
+      if (problem.isLocked()) {
+        serialized.isLocked = true;
+        const lockedUntil = problem.getLockedUntil();
+        if (lockedUntil) {
+          serialized.lockedUntil = lockedUntil.toISOString();
+        }
+      }
+
+      return serialized;
+    }),
   }));
 
   return { patients: serializedPatients };
@@ -94,7 +112,7 @@ export function assignProblem(
 /**
  * Resolve a problem (mark as resolved and unassign)
  */
-export function resolveProblem(
+export async function resolveProblem(
   patientId: string,
   problemId: string,
   caregiverId: string,
@@ -102,15 +120,15 @@ export function resolveProblem(
     firstName: string;
     lastName: string;
   },
-): WardEventData.ProblemResolved | null {
+): Promise<WardEventData.ProblemResolved | null> {
   const patient = getPatient(patientId);
   if (!patient) return null;
 
   const problem = patient.problems.find((p) => p.id === problemId);
   if (!problem) return null;
 
-  // Resolve the problem using Problem class method
-  problem.resolve();
+  // Resolve the problem using Problem class method (can be async for special problems)
+  await problem.resolve();
 
   console.log(
     `[Problem] Problem ${problemId} resolved by ${caregiverName.firstName} ${caregiverName.lastName}`,
@@ -133,7 +151,7 @@ export function resolveProblem(
 export function updateProblemStatusInWard(
   patientId: string,
   problemId: string,
-  newStatus: "critical" | "serious" | "stable" | "resolved",
+  newStatus: "critical" | "serious" | "stable" | "resolved" | "processing",
   caregiverId: string,
   caregiverName: {
     firstName: string;

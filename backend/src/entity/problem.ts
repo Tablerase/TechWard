@@ -1,6 +1,11 @@
 import { Caregiver } from "./caregiver";
 
-export type ProblemStatus = "critical" | "serious" | "stable" | "resolved";
+export type ProblemStatus =
+  | "critical"
+  | "serious"
+  | "stable"
+  | "resolved"
+  | "processing";
 
 export const ProblemTypes = {
   DEFAULT: "default",
@@ -47,6 +52,22 @@ export class Problem {
    */
   isAvailable(): boolean {
     return !this.assignedCaregiver && this.status !== "resolved";
+  }
+
+  /**
+   * Check if the problem is locked (can be overridden by subclasses)
+   * Default implementation: problems are never locked
+   */
+  isLocked(): boolean {
+    return false;
+  }
+
+  /**
+   * Get the lock expiration time (can be overridden by subclasses)
+   * Default implementation: no lock
+   */
+  getLockedUntil(): Date | null {
+    return null;
   }
 
   /**

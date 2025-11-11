@@ -151,29 +151,78 @@ export function registerWardHandlers(socket: WardSocket) {
   // Handle problem resolution
   socket.on(
     WardEvents.RESOLVE_PROBLEM,
-    (data: WardEventData.ResolveProblem) => {
+    async (data: WardEventData.ResolveProblem) => {
       const currentSession = getSession(socket.id);
       if (!currentSession) return;
 
-      const result = resolveProblem(
-        data.patientId,
-        data.problemId,
-        currentSession.caregiverId,
-        currentSession.caregiverName,
-      );
+      // First, emit processing state immediately
+      const processingEvent: WardEventData.ProblemProcessing = {
+        patientId: data.patientId,
+        problemId: data.problemId,
+        processingBy: {
+          caregiverId: currentSession.caregiverId,
+          caregiverName: currentSession.caregiverName,
+        },
+        timestamp: new Date().toISOString(),
+        message: "Starting problem resolution...",
+      };
 
-      if (result) {
-        // Broadcast to all in the room
-        socket
-          .to(currentSession.lastRoom)
-          .emit(WardEvents.PROBLEM_RESOLVED, result);
+      // Broadcast processing state to all in room (including sender)
+      socket
+        .to(currentSession.lastRoom)
+        .emit(WardEvents.PROBLEM_PROCESSING, processingEvent);
+      socket.emit(WardEvents.PROBLEM_PROCESSING, processingEvent);
 
-        // Send updated patients list to all in room
-        const wardPatients = getWardPatients();
+      // Send updated patients list showing processing status
+      let wardPatients = getWardPatients();
+      socket
+        .to(currentSession.lastRoom)
+        .emit(WardEvents.WARD_PATIENTS, wardPatients);
+      socket.emit(WardEvents.WARD_PATIENTS, wardPatients);
+
+      try {
+        // Resolve the problem (async for special problems like ArgoProblem)
+        const result = await resolveProblem(
+          data.patientId,
+          data.problemId,
+          currentSession.caregiverId,
+          currentSession.caregiverName,
+        );
+
+        if (result) {
+          // Broadcast resolution success to all in the room
+          socket
+            .to(currentSession.lastRoom)
+            .emit(WardEvents.PROBLEM_RESOLVED, result);
+
+          // Send updated patients list to all in room
+          wardPatients = getWardPatients();
+          socket
+            .to(currentSession.lastRoom)
+            .emit(WardEvents.WARD_PATIENTS, wardPatients);
+          socket.emit(WardEvents.WARD_PATIENTS, wardPatients);
+        }
+      } catch (error) {
+        console.error("[WARD] Problem resolution failed:", error);
+
+        // Send updated patients list (problem status may have reverted)
+        wardPatients = getWardPatients();
         socket
           .to(currentSession.lastRoom)
           .emit(WardEvents.WARD_PATIENTS, wardPatients);
         socket.emit(WardEvents.WARD_PATIENTS, wardPatients);
+
+        // Optionally emit an error event (you could add this to socket events)
+        socket.emit(WardEvents.PROBLEM_UPDATED, {
+          patientId: data.patientId,
+          problemId: data.problemId,
+          newStatus: "serious",
+          updatedBy: {
+            caregiverId: currentSession.caregiverId,
+            caregiverName: currentSession.caregiverName,
+          },
+          timestamp: new Date().toISOString(),
+        });
       }
     },
   );
@@ -183,25 +232,40 @@ export function registerWardHandlers(socket: WardSocket) {
     const currentSession = getSession(socket.id);
     if (!currentSession) return;
 
-    const result = updateProblemStatusInWard(
-      data.patientId,
-      data.problemId,
-      data.status,
-      currentSession.caregiverId,
-      currentSession.caregiverName,
-    );
+    try {
+      const result = updateProblemStatusInWard(
+        data.patientId,
+        data.problemId,
+        data.status,
+        currentSession.caregiverId,
+        currentSession.caregiverName,
+      );
 
-    if (result) {
-      // Broadcast to all in the room
-      socket
-        .to(currentSession.lastRoom)
-        .emit(WardEvents.PROBLEM_UPDATED, result);
+      if (result) {
+        // Broadcast to all in the room
+        socket
+          .to(currentSession.lastRoom)
+          .emit(WardEvents.PROBLEM_UPDATED, result);
 
-      // Send updated patients list to all in room
+        // Send updated patients list to all in room
+        const wardPatients = getWardPatients();
+        socket
+          .to(currentSession.lastRoom)
+          .emit(WardEvents.WARD_PATIENTS, wardPatients);
+        socket.emit(WardEvents.WARD_PATIENTS, wardPatients);
+      }
+    } catch (error) {
+      console.error("[WARD] Problem status update failed:", error);
+
+      // Send error message to client (could add a specific error event)
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to update problem status";
+      console.log(`[WARD] Sending error to client: ${errorMessage}`);
+
+      // Send current state back to client
       const wardPatients = getWardPatients();
-      socket
-        .to(currentSession.lastRoom)
-        .emit(WardEvents.WARD_PATIENTS, wardPatients);
       socket.emit(WardEvents.WARD_PATIENTS, wardPatients);
     }
   });

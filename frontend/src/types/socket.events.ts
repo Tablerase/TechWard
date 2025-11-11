@@ -50,6 +50,8 @@ export const WardEvents = {
   RESOLVE_PROBLEM: "problem:resolve",
   /** Broadcast when a problem is resolved */
   PROBLEM_RESOLVED: "problem:resolved",
+  /** Broadcast when a problem starts processing */
+  PROBLEM_PROCESSING: "problem:processing",
   /** Client updates problem status */
   UPDATE_PROBLEM: "problem:update",
   /** Broadcast when problem status is updated */
@@ -105,7 +107,7 @@ export interface WardPatients {
     problems: {
       id: string;
       description: string;
-      status: "critical" | "serious" | "stable" | "resolved";
+      status: "critical" | "serious" | "stable" | "resolved" | "processing";
       assignedTo?: {
         caregiverId: string;
         caregiverName: {
@@ -115,6 +117,8 @@ export interface WardPatients {
       };
       createdAt: string;
       updatedAt: string;
+      isLocked?: boolean;
+      lockedUntil?: string;
     }[];
   }[];
 }
@@ -147,11 +151,26 @@ export interface WardProblemResolved {
   timestamp: string;
 }
 
+/** Broadcast when problem starts processing */
+export interface WardProblemProcessing {
+  patientId: string;
+  problemId: string;
+  processingBy: {
+    caregiverId: string;
+    caregiverName: {
+      firstName: string;
+      lastName: string;
+    };
+  };
+  timestamp: string;
+  message?: string;
+}
+
 /** Broadcast when problem status is updated */
 export interface WardProblemUpdated {
   patientId: string;
   problemId: string;
-  newStatus: "critical" | "serious" | "stable" | "resolved";
+  newStatus: "critical" | "serious" | "stable" | "resolved" | "processing";
   updatedBy: {
     caregiverId: string;
     caregiverName: {
@@ -179,6 +198,7 @@ export interface WardServerEvents {
   [WardEvents.WARD_PATIENTS]: (data: WardPatients) => void;
   [WardEvents.PROBLEM_ASSIGNED]: (data: WardProblemAssigned) => void;
   [WardEvents.PROBLEM_RESOLVED]: (data: WardProblemResolved) => void;
+  [WardEvents.PROBLEM_PROCESSING]: (data: WardProblemProcessing) => void;
   [WardEvents.PROBLEM_UPDATED]: (data: WardProblemUpdated) => void;
 }
 
@@ -199,7 +219,7 @@ export interface WardClientEmitEvents {
   [WardEvents.UPDATE_PROBLEM]: (data: {
     patientId: string;
     problemId: string;
-    status: "critical" | "serious" | "stable" | "resolved";
+    status: "critical" | "serious" | "stable" | "resolved" | "processing";
   }) => void;
 }
 

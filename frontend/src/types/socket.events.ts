@@ -56,6 +56,12 @@ export const WardEvents = {
   UPDATE_PROBLEM: "problem:update",
   /** Broadcast when problem status is updated */
   PROBLEM_UPDATED: "problem:updated",
+
+  // === Caregiver Stats Events ===
+  /** Request caregiver statistics */
+  GET_CAREGIVER_STATS: "caregiver:getStats",
+  /** Send caregiver statistics */
+  CAREGIVER_STATS: "caregiver:stats",
 } as const;
 
 /**
@@ -181,6 +187,27 @@ export interface WardProblemUpdated {
   timestamp: string;
 }
 
+/** Request caregiver statistics */
+export interface WardGetCaregiverStats {
+  caregiverId?: string; // If not provided, use current caregiver
+}
+
+/** Caregiver statistics response */
+export interface WardCaregiverStats {
+  id: string;
+  name: {
+    firstName: string;
+    lastName: string;
+  };
+  totalResolved: number;
+  resolvedProblems: {
+    problemId: string;
+    patientId: string;
+    description: string;
+    resolvedAt: string;
+  }[];
+}
+
 /**
  * Type-safe Socket for ward namespace on frontend
  * Use this for better autocomplete and type checking
@@ -200,6 +227,7 @@ export interface WardServerEvents {
   [WardEvents.PROBLEM_RESOLVED]: (data: WardProblemResolved) => void;
   [WardEvents.PROBLEM_PROCESSING]: (data: WardProblemProcessing) => void;
   [WardEvents.PROBLEM_UPDATED]: (data: WardProblemUpdated) => void;
+  [WardEvents.CAREGIVER_STATS]: (data: WardCaregiverStats) => void;
 }
 
 /**
@@ -221,6 +249,7 @@ export interface WardClientEmitEvents {
     problemId: string;
     status: "critical" | "serious" | "stable" | "resolved" | "processing";
   }) => void;
+  [WardEvents.GET_CAREGIVER_STATS]: (data: WardGetCaregiverStats) => void;
 }
 
 /**

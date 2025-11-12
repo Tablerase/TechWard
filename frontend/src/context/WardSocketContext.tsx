@@ -7,6 +7,7 @@ import {
   WardProblemAssigned,
   WardProblemResolved,
   WardProblemUpdated,
+  WardCaregiverStats,
 } from "@/types/socket.events";
 
 export interface WardSocketContextValue {
@@ -19,6 +20,7 @@ export interface WardSocketContextValue {
     type: "assigned" | "resolved" | "updated";
     data: WardProblemAssigned | WardProblemResolved | WardProblemUpdated;
   } | null;
+  caregiverStats: WardCaregiverStats | null;
 }
 
 export const WardSocketContext = createContext<

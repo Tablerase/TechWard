@@ -19,3 +19,21 @@ export function addCaregiver(
 export function removeCaregiver(id: string) {
   return caregiversModel.removeCaregiver(id);
 }
+
+export function addResolvedProblem(
+  caregiverId: string,
+  problemId: string,
+  patientId: string,
+  description: string,
+) {
+  return caregiversModel.addResolvedProblem(
+    caregiverId,
+    problemId,
+    patientId,
+    description,
+  );
+}
+
+export function getCaregiverStats(caregiverId: string) {
+  return caregiversModel.getCaregiverStats(caregiverId);
+}

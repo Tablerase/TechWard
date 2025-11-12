@@ -9,6 +9,7 @@ import {
   WardProblemAssigned,
   WardProblemResolved,
   WardProblemUpdated,
+  WardCaregiverStats,
 } from "@/types/socket.events";
 import { WardSocketContext } from "./WardSocketContext";
 import { useAuth } from "./AuthContext";
@@ -31,6 +32,8 @@ export function WardSocketProvider({
     type: "assigned" | "resolved" | "updated";
     data: WardProblemAssigned | WardProblemResolved | WardProblemUpdated;
   } | null>(null);
+  const [caregiverStats, setCaregiverStats] =
+    useState<WardCaregiverStats | null>(null);
 
   useEffect(() => {
     // Only connect if authenticated and have access token
@@ -102,6 +105,9 @@ export function WardSocketProvider({
         }
         setCaregiverInfo(data);
         setIsConnected(true);
+
+        // Request caregiver stats after assignment
+        typedWardSocket.emit(WardEvents.GET_CAREGIVER_STATS, {});
       }
     );
 
@@ -136,6 +142,7 @@ export function WardSocketProvider({
         setLastProblemUpdate({ type: "resolved", data });
         // Request updated patients list
         typedWardSocket.emit(WardEvents.GET_WARD_PATIENTS, { room: "default" });
+        // Note: Stats will be automatically sent by server to the resolver
       }
     );
 
@@ -149,6 +156,17 @@ export function WardSocketProvider({
         setLastProblemUpdate({ type: "updated", data });
         // Request updated patients list
         typedWardSocket.emit(WardEvents.GET_WARD_PATIENTS, { room: "default" });
+      }
+    );
+
+    // Listen for caregiver stats
+    typedWardSocket.on(
+      WardEvents.CAREGIVER_STATS,
+      (data: WardCaregiverStats) => {
+        console.log(
+          `📊 Received stats for ${data.name.firstName}: ${data.totalResolved} problems resolved`
+        );
+        setCaregiverStats(data);
       }
     );
 
@@ -171,6 +189,7 @@ export function WardSocketProvider({
         caregiverInfo,
         wardPatients,
         lastProblemUpdate,
+        caregiverStats,
       }}
     >
       {children}

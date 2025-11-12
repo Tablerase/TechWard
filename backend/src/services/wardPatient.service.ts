@@ -127,6 +127,14 @@ export async function resolveProblem(
   const problem = patient.problems.find((p) => p.id === problemId);
   if (!problem) return null;
 
+  // Track the resolved problem in caregiver's history
+  caregiversService.addResolvedProblem(
+    caregiverId,
+    problemId,
+    patientId,
+    problem.description,
+  );
+
   // Resolve the problem using Problem class method (can be async for special problems)
   await problem.resolve();
 

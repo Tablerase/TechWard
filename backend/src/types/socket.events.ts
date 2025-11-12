@@ -58,6 +58,12 @@ export const WardEvents = {
   UPDATE_PROBLEM: "problem:update",
   /** Broadcast when problem status is updated */
   PROBLEM_UPDATED: "problem:updated",
+
+  // === Caregiver Stats Events ===
+  /** Request caregiver statistics */
+  GET_CAREGIVER_STATS: "caregiver:getStats",
+  /** Send caregiver statistics */
+  CAREGIVER_STATS: "caregiver:stats",
 } as const;
 
 /**
@@ -206,6 +212,27 @@ export namespace WardEventData {
     };
     timestamp: string;
   }
+
+  /** Request caregiver statistics */
+  export interface GetCaregiverStats {
+    caregiverId?: string; // If not provided, use current caregiver
+  }
+
+  /** Caregiver statistics response */
+  export interface CaregiverStats {
+    id: string;
+    name: {
+      firstName: string;
+      lastName: string;
+    };
+    totalResolved: number;
+    resolvedProblems: {
+      problemId: string;
+      patientId: string;
+      description: string;
+      resolvedAt: string;
+    }[];
+  }
 }
 
 /**
@@ -225,6 +252,7 @@ export interface WardServerEvents {
     data: WardEventData.ProblemProcessing,
   ) => void;
   [WardEvents.PROBLEM_UPDATED]: (data: WardEventData.ProblemUpdated) => void;
+  [WardEvents.CAREGIVER_STATS]: (data: WardEventData.CaregiverStats) => void;
 }
 
 /**
@@ -236,6 +264,9 @@ export interface WardClientEvents {
   [WardEvents.ASSIGN_PROBLEM]: (data: WardEventData.AssignProblem) => void;
   [WardEvents.RESOLVE_PROBLEM]: (data: WardEventData.ResolveProblem) => void;
   [WardEvents.UPDATE_PROBLEM]: (data: WardEventData.UpdateProblem) => void;
+  [WardEvents.GET_CAREGIVER_STATS]: (
+    data: WardEventData.GetCaregiverStats,
+  ) => void;
 }
 
 /**

@@ -16,6 +16,7 @@ import {
   updateProblemStatusInWard,
   releaseCaregiversProblems,
 } from "@services/wardPatient.service";
+import * as caregiversService from "@services/caregivers.service";
 
 export function registerWardHandlers(socket: WardSocket) {
   // Get authenticated user from socket data (set by middleware)
@@ -201,6 +202,17 @@ export function registerWardHandlers(socket: WardSocket) {
             .to(currentSession.lastRoom)
             .emit(WardEvents.WARD_PATIENTS, wardPatients);
           socket.emit(WardEvents.WARD_PATIENTS, wardPatients);
+
+          // Send updated stats to the caregiver who resolved the problem
+          const stats = caregiversService.getCaregiverStats(
+            currentSession.caregiverId,
+          );
+          if (stats) {
+            socket.emit(WardEvents.CAREGIVER_STATS, stats);
+            console.log(
+              `[WARD] Sent updated stats to ${currentSession.caregiverName.firstName} (${stats.totalResolved} total)`,
+            );
+          }
         }
       } catch (error) {
         console.error("[WARD] Problem resolution failed:", error);
@@ -269,4 +281,23 @@ export function registerWardHandlers(socket: WardSocket) {
       socket.emit(WardEvents.WARD_PATIENTS, wardPatients);
     }
   });
+
+  // Handle caregiver stats request
+  socket.on(
+    WardEvents.GET_CAREGIVER_STATS,
+    (data: WardEventData.GetCaregiverStats) => {
+      const currentSession = getSession(socket.id);
+      if (!currentSession) return;
+
+      // Use provided caregiverId or current caregiver's ID
+      const caregiverId = data.caregiverId || currentSession.caregiverId;
+      const stats = caregiversService.getCaregiverStats(caregiverId);
+
+      if (stats) {
+        socket.emit(WardEvents.CAREGIVER_STATS, stats);
+      } else {
+        console.error(`[WARD] Stats not found for caregiver ${caregiverId}`);
+      }
+    },
+  );
 }

@@ -181,7 +181,27 @@ export function registerWardHandlers(socket: WardSocket) {
         .emit(WardEvents.WARD_PATIENTS, wardPatients);
       socket.emit(WardEvents.WARD_PATIENTS, wardPatients);
 
+      // Helper function to send processing updates
+      const sendProcessingUpdate = (message: string) => {
+        const updateEvent: WardEventData.ProblemProcessing = {
+          patientId: data.patientId,
+          problemId: data.problemId,
+          processingBy: {
+            caregiverId: currentSession.caregiverId,
+            caregiverName: currentSession.caregiverName,
+          },
+          timestamp: new Date().toISOString(),
+          message,
+        };
+        socket
+          .to(currentSession.lastRoom)
+          .emit(WardEvents.PROBLEM_PROCESSING, updateEvent);
+        socket.emit(WardEvents.PROBLEM_PROCESSING, updateEvent);
+      };
+
       try {
+        sendProcessingUpdate("Analyzing problem...");
+
         // Resolve the problem (async for special problems like ArgoProblem)
         const result = await resolveProblem(
           data.patientId,
@@ -191,10 +211,11 @@ export function registerWardHandlers(socket: WardSocket) {
         );
 
         if (result) {
-          // Broadcast resolution success to all in the room
+          // Broadcast resolution success to all in the room (including sender)
           socket
             .to(currentSession.lastRoom)
             .emit(WardEvents.PROBLEM_RESOLVED, result);
+          socket.emit(WardEvents.PROBLEM_RESOLVED, result);
 
           // Send updated patients list to all in room
           wardPatients = getWardPatients();
@@ -216,6 +237,10 @@ export function registerWardHandlers(socket: WardSocket) {
         }
       } catch (error) {
         console.error("[WARD] Problem resolution failed:", error);
+
+        sendProcessingUpdate(
+          `Resolution failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
 
         // Send updated patients list (problem status may have reverted)
         wardPatients = getWardPatients();

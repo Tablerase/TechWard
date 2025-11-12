@@ -10,6 +10,7 @@ import {
   WardProblemResolved,
   WardProblemUpdated,
   WardCaregiverStats,
+  WardProblemProcessing,
 } from "@/types/socket.events";
 import { WardSocketContext } from "./WardSocketContext";
 import { useAuth } from "./AuthContext";
@@ -29,8 +30,12 @@ export function WardSocketProvider({
     useState<WardCaregiverAssigned | null>(null);
   const [wardPatients, setWardPatients] = useState<WardPatients | null>(null);
   const [lastProblemUpdate, setLastProblemUpdate] = useState<{
-    type: "assigned" | "resolved" | "updated";
-    data: WardProblemAssigned | WardProblemResolved | WardProblemUpdated;
+    type: "assigned" | "resolved" | "updated" | "processing";
+    data:
+      | WardProblemAssigned
+      | WardProblemResolved
+      | WardProblemUpdated
+      | WardProblemProcessing;
   } | null>(null);
   const [caregiverStats, setCaregiverStats] =
     useState<WardCaregiverStats | null>(null);
@@ -155,6 +160,17 @@ export function WardSocketProvider({
         );
         setLastProblemUpdate({ type: "updated", data });
         // Request updated patients list
+        typedWardSocket.emit(WardEvents.GET_WARD_PATIENTS, { room: "default" });
+      }
+    );
+
+    // Listen for problem processing updates
+    typedWardSocket.on(
+      WardEvents.PROBLEM_PROCESSING,
+      (data: WardProblemProcessing) => {
+        console.log(`⏳ Problem ${data.problemId} processing: ${data.message}`);
+        setLastProblemUpdate({ type: "processing", data });
+        // Request updated patients list to show processing status
         typedWardSocket.emit(WardEvents.GET_WARD_PATIENTS, { room: "default" });
       }
     );

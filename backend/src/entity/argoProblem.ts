@@ -84,12 +84,23 @@ export class ArgoProblem extends Problem {
     this.updatedAt = new Date();
 
     try {
+      console.log(
+        `[ArgoProblem] Fetching current deployment image for ${process.env.ARGOCD_DEMO_APPLICATION_NAME}...`,
+      );
       const image = await getDeploymentImage(
         process.env.ARGOCD_DEMO_NAMESPACE,
         process.env.ARGOCD_DEMO_APPLICATION_NAME,
       );
+
+      console.log(
+        `[ArgoProblem] Current image: ${image}, selecting new tag...`,
+      );
       const newTag = allowedTags.find((value) => !image?.includes(value));
-      await updateDeployment(newTag);
+
+      console.log(`[ArgoProblem] Updating deployment to tag: ${newTag}...`);
+      await updateDeployment(newTag, this.assignedCaregiver);
+
+      console.log(`[ArgoProblem] Deployment updated successfully!`);
 
       // Mark as resolved after successful deployment
       this.status = "resolved";

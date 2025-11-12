@@ -8,6 +8,7 @@ import {
   WardProblemResolved,
   WardProblemUpdated,
   WardCaregiverStats,
+  WardProblemProcessing,
 } from "@/types/socket.events";
 
 export interface WardSocketContextValue {
@@ -17,8 +18,12 @@ export interface WardSocketContextValue {
   caregiverInfo: WardCaregiverAssigned | null;
   wardPatients: WardPatients | null;
   lastProblemUpdate: {
-    type: "assigned" | "resolved" | "updated";
-    data: WardProblemAssigned | WardProblemResolved | WardProblemUpdated;
+    type: "assigned" | "resolved" | "updated" | "processing";
+    data:
+      | WardProblemAssigned
+      | WardProblemResolved
+      | WardProblemUpdated
+      | WardProblemProcessing;
   } | null;
   caregiverStats: WardCaregiverStats | null;
 }

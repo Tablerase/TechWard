@@ -3,6 +3,7 @@ import fs from "fs";
 import path, { resolve } from "path";
 import YAML from "yaml";
 import { config } from "dotenv";
+import { Caregiver } from "@entity/caregiver";
 
 config(); // Loads env var
 
@@ -54,7 +55,9 @@ async function updateGitDeploymentRepo() {
  * @param newTag Optional new tag to set; if omitted, the current tag is returned.
  * @returns The current image string if no newTag is provided; otherwise void.
  */
-export async function gitDeploymentImage(newTag?: string): Promise<string | void> {
+export async function gitDeploymentImage(
+  newTag?: string,
+): Promise<string | void> {
   if (!fs.existsSync(DEPLOYMENT_PATH)) {
     throw new Error("deployment.yaml not found in repository");
   }
@@ -86,6 +89,7 @@ export async function gitDeploymentImage(newTag?: string): Promise<string | void
  */
 export async function updateDeployment(
   newTag: string = "1.25.0",
+  caregiver?: Caregiver,
 ): Promise<void> {
   if (!allowedTags.includes(newTag)) {
     throw new Error(
@@ -105,8 +109,10 @@ export async function updateDeployment(
     "user.email",
     `${GITHUB_BOT_USERNAME}@users.noreply.github.com`,
   );
-  await git.commit(`Update image tag to ${newTag}`);
+  await git.commit(
+    `Update image tag to ${newTag} by ${caregiver ? caregiver.firstname + " " + caregiver.lastname : "automated script"}`,
+  );
   await git.push("origin", "main");
 
-  console.log(`Deployment updated to tag: ${newTag}`);
+  console.log(`[ArgoProblem] Deployment updated to tag: ${newTag}`);
 }

@@ -10,10 +10,17 @@ import {
   WardProblemResolved,
   WardProblemUpdated,
 } from "@/types/socket.events";
+import { WardSocketContext } from "./WardSocketContext";
+import { useAuth } from "./AuthContext";
 
 const SOCKET_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
-export function useSocket() {
+export function WardSocketProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { accessToken, isAuthenticated } = useAuth();
   const [mainSocket, setMainSocket] = useState<Socket | null>(null);
   const [wardSocket, setWardSocket] = useState<WardClientSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -26,13 +33,13 @@ export function useSocket() {
   } | null>(null);
 
   useEffect(() => {
-    // Get access token from localStorage
-    const accessToken = localStorage.getItem("accessToken");
-
-    if (!accessToken) {
-      console.warn("No access token found, cannot connect to socket");
+    // Only connect if authenticated and have access token
+    if (!isAuthenticated || !accessToken) {
+      console.warn("Not authenticated, skipping socket connection");
       return;
     }
+
+    console.log("Initializing socket connection...");
 
     const manager = new Manager(SOCKET_URL, {
       reconnection: true,
@@ -41,19 +48,19 @@ export function useSocket() {
       reconnectionAttempts: 5,
     });
 
-    const mainSocket = manager.socket("/");
+    const mainSocketInstance = manager.socket("/");
 
-    mainSocket.on("connect", () => {
+    mainSocketInstance.on("connect", () => {
       console.log("Socket connected to main namespace");
       setIsConnected(true);
     });
 
-    mainSocket.on("disconnect", () => {
+    mainSocketInstance.on("disconnect", () => {
       console.log("Socket disconnected from main namespace");
       setIsConnected(false);
     });
 
-    setMainSocket(mainSocket);
+    setMainSocket(mainSocketInstance);
 
     // Connect to /ward namespace with JWT authentication
     const rawWardSocket = manager.socket("/ward", {
@@ -147,18 +154,26 @@ export function useSocket() {
 
     setWardSocket(typedWardSocket);
 
+    // Cleanup function - disconnect sockets when component unmounts or auth changes
     return () => {
+      console.log("Cleaning up socket connections...");
       typedWardSocket.close();
-      mainSocket.close();
+      mainSocketInstance.close();
     };
-  }, []); // Empty dependency array - only connect once on mount
+  }, [accessToken, isAuthenticated]); // Reconnect when auth changes
 
-  return {
-    mainSocket,
-    wardSocket,
-    isConnected,
-    caregiverInfo,
-    wardPatients,
-    lastProblemUpdate,
-  };
+  return (
+    <WardSocketContext.Provider
+      value={{
+        mainSocket,
+        wardSocket,
+        isConnected,
+        caregiverInfo,
+        wardPatients,
+        lastProblemUpdate,
+      }}
+    >
+      {children}
+    </WardSocketContext.Provider>
+  );
 }

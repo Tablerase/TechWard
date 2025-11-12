@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import "./PatientRoom.css";
-import { useSocket } from "@/hooks/useSocket";
 import { WardEvents } from "@/types/socket.events";
+import { useWardSocket } from "@/context/WardSocketContext";
 
 export const PatientRoom = () => {
-  const { wardSocket, wardPatients } = useSocket();
+  const { wardSocket, wardPatients } = useWardSocket();
 
   // Get the first patient and first problem for visualization
   const patient = wardPatients?.patients[0] ?? null;

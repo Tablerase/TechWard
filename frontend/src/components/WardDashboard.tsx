@@ -5,7 +5,7 @@
  * where caregivers can see and manage patient problems.
  */
 
-import { useSocket } from "@/hooks/useSocket";
+import { useWardSocket } from "@/context/WardSocketContext";
 import {
   WardEvents,
   WardProblemAssigned,
@@ -16,7 +16,7 @@ import { useState, useEffect } from "react";
 
 export function WardDashboard() {
   const { wardSocket, wardPatients, lastProblemUpdate, caregiverInfo } =
-    useSocket();
+    useWardSocket();
   const [currentTime, setCurrentTime] = useState(Date.now());
 
   // Update current time every second for countdown timers

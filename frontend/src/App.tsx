@@ -3,6 +3,7 @@ import { PatientRoom } from "@components/PatientRoom";
 import WardDashboard from "./components/WardDashboard";
 import { Navigation } from "./components/Navigation";
 import { AuthProvider } from "./context/AuthProvider";
+import { WardSocketProvider } from "./context/WardSocketProvider";
 import { useAuth } from "./context/AuthContext";
 
 function AppContent() {
@@ -81,13 +82,15 @@ function AppContent() {
   }
 
   return (
-    <Router>
-      <Navigation />
-      <Routes>
-        <Route path="/" element={<WardDashboard />} />
-        <Route path="/patient-room" element={<PatientRoom />} />
-      </Routes>
-    </Router>
+    <WardSocketProvider>
+      <Router>
+        <Navigation />
+        <Routes>
+          <Route path="/" element={<WardDashboard />} />
+          <Route path="/patient-room" element={<PatientRoom />} />
+        </Routes>
+      </Router>
+    </WardSocketProvider>
   );
 }
 

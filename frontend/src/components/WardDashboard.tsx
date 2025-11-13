@@ -86,17 +86,17 @@ export function WardDashboard() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "critical":
-        return "bg-red-500";
+        return "bg-[#e8b7b7]"; // critical - pink/red
       case "serious":
-        return "bg-orange-500";
+        return "bg-[#f4c4a0]"; // serious - orange
       case "stable":
-        return "bg-yellow-500";
+        return "bg-[#b8c7a8]"; // stable - green
       case "resolved":
-        return "bg-green-500";
+        return "bg-[#95b88f]"; // resolved - darker green
       case "processing":
-        return "bg-blue-500";
+        return "bg-[#9fc9eb]"; // processing - blue
       default:
-        return "bg-gray-500";
+        return "bg-[#f2eadf]"; // base-muted
     }
   };
 
@@ -131,10 +131,12 @@ export function WardDashboard() {
   return (
     <div className="p-6">
       {/* Header with Caregiver Info */}
-      <div className="mb-6 bg-blue-50 p-4 rounded">
-        <h1 className="text-2xl font-bold mb-2">🏥 Ward Dashboard</h1>
+      <div className="mb-6 bg-(--color-base-muted) p-4 rounded border border-(--color-base-border)">
+        <h1 className="text-2xl font-bold mb-2 text-(--color-base-text)">
+          🏥 Ward Dashboard
+        </h1>
         {caregiverInfo && (
-          <p className="text-gray-600">
+          <p className="text-(--color-base-text-muted)">
             👤 Welcome, {caregiverInfo.name.firstName}{" "}
             {caregiverInfo.name.lastName}
             {caregiverInfo.isNewClient && " - First time here! 🎉"}
@@ -146,12 +148,12 @@ export function WardDashboard() {
         <div
           className={`mb-6 border rounded p-4 ${
             lastProblemUpdate.type === "processing"
-              ? "bg-blue-50 border-blue-400"
-              : "bg-blue-100 border-blue-400"
+              ? "bg-(--color-primary-light) border-(--color-primary)"
+              : "bg-(--color-primary-light)/50 border-(--color-primary)"
           }`}
         >
           {lastProblemUpdate.type === "assigned" && (
-            <p className="text-blue-800">
+            <p className="text-(--color-base-text)">
               📌{" "}
               <strong>
                 {
@@ -163,7 +165,7 @@ export function WardDashboard() {
             </p>
           )}
           {lastProblemUpdate.type === "resolved" && (
-            <p className="text-green-800">
+            <p className="text-(--color-secondary-dark)">
               ✅{" "}
               <strong>
                 {
@@ -175,7 +177,7 @@ export function WardDashboard() {
             </p>
           )}
           {lastProblemUpdate.type === "updated" && (
-            <p className="text-yellow-800">
+            <p className="text-(--color-tertiary-dark)">
               🔄{" "}
               <strong>
                 {
@@ -190,9 +192,9 @@ export function WardDashboard() {
             </p>
           )}
           {lastProblemUpdate.type === "processing" && (
-            <p className="text-blue-800 flex items-center gap-2">
+            <p className="text-(--color-base-text) flex items-center gap-2">
               <svg
-                className="animate-spin h-5 w-5 text-blue-600"
+                className="animate-spin h-5 w-5 text-(--color-primary-dark)"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -233,12 +235,14 @@ export function WardDashboard() {
         {wardPatients.patients.map((patient) => (
           <div
             key={patient.id}
-            className="border rounded-lg overflow-hidden shadow-md"
+            className="border rounded-lg overflow-hidden shadow-md border-(--color-base-border)"
           >
             {/* Patient Header */}
-            <div className="bg-blue-100 p-4 border-b">
-              <h2 className="text-xl font-bold">{patient.name}</h2>
-              <p className="text-gray-600 text-sm">
+            <div className="bg-(--color-base-muted) p-4 border-b border-(--color-base-border)">
+              <h2 className="text-xl font-bold text-(--color-base-text)">
+                {patient.name}
+              </h2>
+              <p className="text-(--color-base-text-muted) text-sm">
                 {patient.problems.length} problem(s)
               </p>
             </div>
@@ -246,7 +250,9 @@ export function WardDashboard() {
             {/* Problems List */}
             <div className="p-4 space-y-4">
               {patient.problems.length === 0 ? (
-                <p className="text-gray-500 italic">No problems</p>
+                <p className="text-(--color-base-text-muted) italic">
+                  No problems
+                </p>
               ) : (
                 patient.problems.map((problem) => {
                   const locked = isActuallyLocked(problem);
@@ -255,11 +261,13 @@ export function WardDashboard() {
                       key={problem.id}
                       className={`p-3 rounded border-l-4 ${getStatusColor(
                         problem.status
-                      )} bg-gray-50 ${locked ? "opacity-75 relative" : ""}`}
+                      )} bg-(--color-base-muted) ${
+                        locked ? "opacity-75 relative" : ""
+                      }`}
                     >
                       {/* Lock Overlay */}
                       {locked && problem.lockedUntil && (
-                        <div className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+                        <div className="absolute top-2 right-2 bg-(--color-status-critical) text-(--color-base-text) px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-4 w-4"
@@ -277,12 +285,12 @@ export function WardDashboard() {
                       )}
 
                       {/* Problem Description */}
-                      <p className="font-semibold text-gray-800">
+                      <p className="font-semibold text-(--color-base-text)">
                         {problem.description}
                       </p>
 
                       {/* Status & Assignment Info */}
-                      <div className="mt-2 text-sm text-gray-600">
+                      <div className="mt-2 text-sm text-(--color-base-text-muted)">
                         <p>
                           Status:{" "}
                           <span className="font-bold capitalize">
@@ -291,7 +299,7 @@ export function WardDashboard() {
                           {problem.status === "processing" && (
                             <span className="ml-2 inline-flex items-center">
                               <svg
-                                className="animate-spin h-4 w-4 text-blue-500"
+                                className="animate-spin h-4 w-4 text-(--color-primary-dark)"
                                 xmlns="http://www.w3.org/2000/svg"
                                 fill="none"
                                 viewBox="0 0 24 24"
@@ -322,9 +330,11 @@ export function WardDashboard() {
                             </span>
                           </p>
                         ) : (
-                          <p className="italic text-gray-400">Unassigned</p>
+                          <p className="italic text-(--color-base-text-muted) opacity-60">
+                            Unassigned
+                          </p>
                         )}
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-xs text-(--color-base-text-muted) opacity-75 mt-1">
                           Updated:{" "}
                           {new Date(problem.updatedAt).toLocaleTimeString()}
                         </p>
@@ -339,10 +349,10 @@ export function WardDashboard() {
                               handleAssignProblem(patient.id, problem.id)
                             }
                             disabled={locked || problem.status === "processing"}
-                            className={`px-3 py-1 text-white text-sm rounded ${
+                            className={`px-3 py-1 text-(--color-base-text) text-sm rounded ${
                               locked || problem.status === "processing"
-                                ? "bg-gray-400 cursor-not-allowed"
-                                : "bg-blue-500 hover:bg-blue-600"
+                                ? "bg-(--color-base-muted) opacity-50 cursor-not-allowed"
+                                : "bg-primary hover:bg-(--color-primary-dark)"
                             }`}
                             title={locked ? "Problem is locked" : undefined}
                           >
@@ -365,9 +375,9 @@ export function WardDashboard() {
                             )
                           }
                           disabled={locked || problem.status === "processing"}
-                          className={`px-2 py-1 border rounded text-sm ${
+                          className={`px-2 py-1 border border-(--color-base-border) rounded text-sm bg-(--color-base-bg) text-(--color-base-text) ${
                             locked || problem.status === "processing"
-                              ? "bg-gray-200 cursor-not-allowed"
+                              ? "opacity-50 cursor-not-allowed"
                               : ""
                           }`}
                           title={locked ? "Problem is locked" : undefined}
@@ -388,10 +398,10 @@ export function WardDashboard() {
                               handleResolveProblem(patient.id, problem.id)
                             }
                             disabled={locked || problem.status === "processing"}
-                            className={`px-3 py-1 text-white text-sm rounded ${
+                            className={`px-3 py-1 text-(--color-base-text) text-sm rounded ${
                               locked || problem.status === "processing"
-                                ? "bg-gray-400 cursor-not-allowed"
-                                : "bg-green-500 hover:bg-green-600"
+                                ? "bg-(--color-base-muted) opacity-50 cursor-not-allowed"
+                                : "bg-secondary hover:bg-(--color-secondary-dark)"
                             }`}
                             title={locked ? "Problem is locked" : undefined}
                           >
@@ -413,17 +423,17 @@ export function WardDashboard() {
       {/* Caregiver Stats Panel */}
       {caregiverStats ? (
         <div
-          className={`mb-6 bg-green-50 border border-green-200 rounded-lg p-4 transition-all duration-300 ${
+          className={`mb-6 bg-(--color-secondary-light) border border-(--color-secondary) rounded-lg p-4 transition-all duration-300 ${
             statsJustUpdated
-              ? "ring-4 ring-green-400 shadow-lg scale-[1.02]"
+              ? "ring-4 ring-(--color-secondary) shadow-lg scale-[1.02]"
               : ""
           }`}
         >
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xl font-bold text-green-800 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-(--color-base-text) flex items-center gap-2">
               📊 Your Performance
               {statsJustUpdated && (
-                <span className="text-sm font-normal text-green-600 animate-pulse">
+                <span className="text-sm font-normal text-(--color-secondary-dark) animate-pulse">
                   ✨ Updated!
                 </span>
               )}
@@ -433,25 +443,27 @@ export function WardDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Total Resolved */}
             <div
-              className={`bg-white rounded p-4 shadow-sm transition-all duration-300 ${
-                statsJustUpdated ? "bg-green-100 ring-2 ring-green-400" : ""
+              className={`bg-(--color-base-bg) rounded p-4 shadow-sm border border-(--color-base-border) transition-all duration-300 ${
+                statsJustUpdated
+                  ? "bg-(--color-secondary-light) ring-2 ring-(--color-secondary)"
+                  : ""
               }`}
             >
-              <div className="text-3xl font-bold text-green-600">
+              <div className="text-3xl font-bold text-(--color-secondary-dark)">
                 {caregiverStats.totalResolved}
               </div>
-              <div className="text-gray-600 text-sm mt-1">
+              <div className="text-(--color-base-text-muted) text-sm mt-1">
                 Total Problems Resolved
               </div>
             </div>
 
             {/* Recent Resolutions */}
-            <div className="bg-white rounded p-4 shadow-sm">
-              <div className="font-semibold text-gray-700 mb-2">
+            <div className="bg-(--color-base-bg) rounded p-4 shadow-sm border border-(--color-base-border)">
+              <div className="font-semibold text-(--color-base-text) mb-2">
                 Recent Resolutions
               </div>
               {caregiverStats.resolvedProblems.length === 0 ? (
-                <p className="text-gray-400 text-sm italic">
+                <p className="text-(--color-base-text-muted) text-sm italic">
                   No problems resolved yet
                 </p>
               ) : (
@@ -462,7 +474,7 @@ export function WardDashboard() {
                     .map((resolved, index) => (
                       <div
                         key={`${resolved.problemId}-${index}`}
-                        className="text-sm text-gray-600"
+                        className="text-sm text-(--color-base-text-muted)"
                       >
                         ✓ {resolved.description.substring(0, 40)}
                         {resolved.description.length > 40 && "..."}
@@ -478,7 +490,7 @@ export function WardDashboard() {
             <div className="mt-4">
               <button
                 onClick={() => setShowStatsModal(true)}
-                className="text-green-700 hover:text-green-800 text-sm font-semibold underline"
+                className="text-(--color-secondary-dark) hover:text-secondary text-sm font-semibold underline"
               >
                 View All {caregiverStats.totalResolved} Resolved Problems →
               </button>
@@ -487,8 +499,8 @@ export function WardDashboard() {
         </div>
       ) : (
         caregiverInfo && (
-          <div className="mb-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <div className="text-gray-500 text-sm">
+          <div className="mb-6 bg-(--color-base-muted) border border-(--color-base-border) rounded-lg p-4">
+            <div className="text-(--color-base-text-muted) text-sm">
               Loading your performance stats...
             </div>
           </div>
@@ -498,26 +510,26 @@ export function WardDashboard() {
       {/* Stats Modal */}
       {showStatsModal && caregiverStats && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-base-text/50 flex items-center justify-center z-50"
           onClick={() => setShowStatsModal(false)}
         >
           <div
-            className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto"
+            className="bg-(--color-base-bg) rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto border border-(--color-base-border) shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-gray-800">
+              <h2 className="text-2xl font-bold text-(--color-base-text)">
                 📊 All Resolved Problems
               </h2>
               <button
                 onClick={() => setShowStatsModal(false)}
-                className="text-gray-500 hover:text-gray-700 text-2xl"
+                className="text-(--color-base-text-muted) hover:text-(--color-base-text) text-2xl"
               >
                 ×
               </button>
             </div>
 
-            <div className="mb-4 text-gray-600">
+            <div className="mb-4 text-(--color-base-text-muted)">
               Total: <strong>{caregiverStats.totalResolved}</strong> problems
               resolved
             </div>
@@ -526,18 +538,18 @@ export function WardDashboard() {
               {caregiverStats.resolvedProblems.map((resolved, index) => (
                 <div
                   key={`${resolved.problemId}-${index}`}
-                  className="border border-gray-200 rounded p-3 hover:bg-gray-50"
+                  className="border border-(--color-base-border) rounded p-3 hover:bg-(--color-base-muted)"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="font-semibold text-gray-800">
+                      <div className="font-semibold text-(--color-base-text)">
                         {resolved.description}
                       </div>
-                      <div className="text-sm text-gray-500 mt-1">
+                      <div className="text-sm text-(--color-base-text-muted) mt-1">
                         Patient ID: {resolved.patientId}
                       </div>
                     </div>
-                    <div className="text-xs text-gray-400 ml-4 whitespace-nowrap">
+                    <div className="text-xs text-(--color-base-text-muted) ml-4 whitespace-nowrap">
                       {new Date(resolved.resolvedAt).toLocaleString()}
                     </div>
                   </div>
@@ -551,7 +563,9 @@ export function WardDashboard() {
       {/* Empty State */}
       {wardPatients.patients.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-2xl text-gray-400">😌 No patients in the ward</p>
+          <p className="text-2xl text-(--color-base-text-muted)">
+            😌 No patients in the ward
+          </p>
         </div>
       )}
     </div>

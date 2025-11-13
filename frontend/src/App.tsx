@@ -23,15 +23,15 @@ function AppContent() {
       >
         <div
           style={{
-            border: "4px solid #f3f3f3",
-            borderTop: "4px solid #3498db",
+            border: "4px solid var(--color-base-muted)",
+            borderTop: "4px solid var(--color-primary)",
             borderRadius: "50%",
             width: "40px",
             height: "40px",
             animation: "spin 1s linear infinite",
           }}
         ></div>
-        <p>Loading...</p>
+        <p style={{ color: "var(--color-base-text-muted)" }}>Loading...</p>
         <style>{`
           @keyframes spin {
             0% { transform: rotate(0deg); }
@@ -58,8 +58,8 @@ function AppContent() {
           textAlign: "center",
         }}
       >
-        <h2>Unable to connect</h2>
-        <p>
+        <h2 style={{ color: "var(--color-base-text)" }}>Unable to connect</h2>
+        <p style={{ color: "var(--color-base-text-muted)" }}>
           We couldn't establish a connection. Please check that the server is
           running.
         </p>
@@ -69,10 +69,10 @@ function AppContent() {
             padding: "0.5rem 1rem",
             fontSize: "1rem",
             cursor: "pointer",
-            backgroundColor: "#3498db",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
+            backgroundColor: "var(--color-primary)",
+            color: "var(--color-base-text)",
+            border: "1px solid var(--color-base-border)",
+            borderRadius: "8px",
           }}
         >
           Retry

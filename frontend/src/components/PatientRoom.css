@@ -1,16 +1,17 @@
 .room {
-  stroke: black;
+  stroke: var(--color-base-text);
   stroke-width: 2;
   transition: fill 0.3s;
 }
 .room.critical {
-  fill: red;
+  fill: var(--color-tertiary);
 }
 .room.healthy {
-  fill: green;
+  fill: var(--color-secondary);
 }
 .patient-room-container {
   font-family: Arial, sans-serif;
   text-align: center;
   margin-top: 50px;
+  color: var(--color-base-text);
 }

@@ -85,10 +85,12 @@ function AppContent() {
     <WardSocketProvider>
       <Router>
         <Navigation />
-        <Routes>
-          <Route path="/" element={<WardDashboard />} />
-          <Route path="/patient-room" element={<PatientRoom />} />
-        </Routes>
+        <main className="app-main">
+          <Routes>
+            <Route path="/" element={<WardDashboard />} />
+            <Route path="/patient-room" element={<PatientRoom />} />
+          </Routes>
+        </main>
       </Router>
     </WardSocketProvider>
   );

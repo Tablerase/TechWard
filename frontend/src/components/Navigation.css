@@ -1,13 +1,25 @@
 .navigation {
-  background-color: #2c3e50;
-  padding: 1rem 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* Floating, translucent navbar with blur */
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 2rem);
+  max-width: 1100px;
+  background: rgba(44, 62, 80, 0.55); /* matches previous dark tone */
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  padding: 0.5rem 1rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.14);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  z-index: 1000;
 }
 
 .nav-list {
   list-style: none;
   display: flex;
-  gap: 2rem;
+  gap: 1.25rem;
   margin: 0;
   padding: 0;
   align-items: center;
@@ -21,18 +33,38 @@
   color: #ecf0f1;
   text-decoration: none;
   font-weight: 500;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  transition: all 0.3s ease;
+  padding: 0.45rem 0.85rem;
+  border-radius: 6px;
+  transition: all 0.18s ease;
   display: block;
 }
 
 .nav-link:hover {
-  background-color: #34495e;
-  color: #3498db;
+  background-color: rgba(52, 73, 94, 0.35);
+  color: #eaf6ff;
 }
 
 .nav-link.active {
-  background-color: #3498db;
+  background-color: rgba(52, 152, 219, 0.9);
   color: white;
+}
+
+/* Give page content breathing room so fixed nav doesn't overlap it */
+.app-main {
+  padding-top: 72px; /* adjust if you change nav height */
+}
+
+/* Responsive tweaks */
+@media (max-width: 640px) {
+  .navigation {
+    top: 12px;
+    width: calc(100% - 1rem);
+    padding: 0.5rem;
+    border-radius: 10px;
+  }
+
+  .nav-list {
+    gap: 0.75rem;
+    justify-content: center;
+  }
 }

@@ -41,7 +41,7 @@
 }
 
 .nav-link:hover {
-  background-color: color-mix(in srgb, var(--color-secondary) 20%, transparent);
+  background-color: color-mix(in srgb, var(--color-primary) 20%, transparent);
   color: var(--color-base-text);
 }
 

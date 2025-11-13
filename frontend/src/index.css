@@ -1,39 +1,41 @@
 @import "tailwindcss";
 
+@theme {
+  /* Base Colors - OKLCH */
+  --color-base-bg: oklch(98.5% 0.02 85); /* #fdf6e3 - cream */
+  --color-base-muted: oklch(95% 0.015 80); /* #f2eadf - light cream */
+  --color-base-border: oklch(88% 0.012 75); /* #e6dcd0 - tan */
+  --color-base-text: oklch(30% 0.02 15); /* #3b2f2f - dark brown */
+  --color-base-text-muted: oklch(50% 0.015 15); /* #7b6f6f - medium brown */
+
+  /* Semantic Colors - OKLCH */
+  --color-primary: oklch(72% 0.11 221); /* #9fc9eb - blue */
+  --color-primary-light: oklch(85% 0.08 221); /* #c5e0f5 - light blue */
+  --color-primary-dark: oklch(65% 0.13 221); /* #7ab3df - dark blue */
+
+  --color-secondary: oklch(77% 0.08 130); /* #b8c7a8 - green */
+  --color-secondary-light: oklch(87% 0.06 130); /* #d4e0c9 - light green */
+  --color-secondary-dark: oklch(68% 0.09 130); /* #9bae88 - dark green */
+
+  --color-tertiary: oklch(80% 0.09 15); /* #e8b7b7 - pink */
+  --color-tertiary-light: oklch(92% 0.05 15); /* #f5d9d9 - light pink */
+  --color-tertiary-dark: oklch(72% 0.11 15); /* #db9595 - dark pink */
+
+  /* Status Colors - OKLCH */
+  --color-status-critical: oklch(80% 0.09 15); /* pink/red */
+  --color-status-serious: oklch(82% 0.09 50); /* orange */
+  --color-status-stable: oklch(77% 0.08 130); /* green */
+  --color-status-resolved: oklch(70% 0.09 130); /* darker green */
+  --color-status-processing: oklch(72% 0.11 221); /* blue */
+
+  /* Accents - OKLCH */
+  --color-accent-playground: oklch(72% 0.11 221);
+  --color-accent-portfolio: oklch(77% 0.08 130);
+  --color-accent-blog: oklch(80% 0.09 15);
+  --color-accent-unified: oklch(78% 0.15 300); /* #d8b4fe - purple */
+}
+
 :root {
-  /* Theme Color Palette - Base */
-  --color-base-bg: #fdf6e3;
-  --color-base-muted: #f2eadf;
-  --color-base-border: #e6dcd0;
-  --color-base-text: #3b2f2f;
-  --color-base-text-muted: #7b6f6f;
-
-  /* Theme Color Palette - Accents */
-  --color-accent-playground: #9fc9eb;
-  --color-accent-portfolio: #b8c7a8;
-  --color-accent-blog: #e8b7b7;
-  --color-accent-unified: #d8b4fe;
-
-  /* Theme Color Palette - Semantic */
-  --color-primary: #9fc9eb;
-  --color-primary-light: #c5e0f5;
-  --color-primary-dark: #7ab3df;
-
-  --color-secondary: #b8c7a8;
-  --color-secondary-light: #d4e0c9;
-  --color-secondary-dark: #9bae88;
-
-  --color-tertiary: #e8b7b7;
-  --color-tertiary-light: #f5d9d9;
-  --color-tertiary-dark: #db9595;
-
-  /* Status Colors - More distinct */
-  --color-status-critical: #e8b7b7;
-  --color-status-serious: #f4c4a0;
-  --color-status-stable: #b8c7a8;
-  --color-status-resolved: #95b88f;
-  --color-status-processing: #9fc9eb;
-
   /* Typography */
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

@@ -13,6 +13,16 @@ const patients: Patient[] = [
     name: "Simple Guy",
     problems: [new Problem("p2", "Simple problem", "default", "critical")],
   },
+  {
+    id: "3",
+    name: "Jane Doe",
+    problems: [],
+  },
+  {
+    id: "4",
+    name: "John Smith",
+    problems: [new Problem("p3", "Another problem", "default", "stable")],
+  },
 ];
 
 export function getPatients() {

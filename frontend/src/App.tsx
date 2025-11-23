@@ -86,7 +86,6 @@ function AppContent() {
   return (
     <WardSocketProvider>
       <Router>
-        <Navigation />
         <main className="app-main">
           <Routes>
             <Route path="/" element={<WardDashboard />} />

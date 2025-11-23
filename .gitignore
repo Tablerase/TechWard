@@ -10,3 +10,8 @@
 *.sw?
 
 .ansible
+.github
+.vscode
+.env
+.env.local
+.env.*.local

@@ -53,7 +53,7 @@
 
 /* Give page content breathing room so fixed nav doesn't overlap it */
 .app-main {
-  padding-top: 72px; /* adjust if you change nav height */
+  /* padding-top: 72px; /* adjust if you change nav height */
 }
 
 /* Responsive tweaks */

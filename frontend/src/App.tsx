@@ -1,10 +1,12 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { PatientRoom } from "@components/PatientRoom";
-import WardDashboard from "./components/WardDashboard";
-import { Navigation } from "./components/Navigation";
-import { AuthProvider } from "./context/AuthProvider";
-import { WardSocketProvider } from "./context/WardSocketProvider";
-import { useAuth } from "./context/AuthContext";
+import WardDashboard from "@components/WardDashboard";
+import { Navigation } from "@components/Navigation";
+import { AuthProvider } from "@context/AuthProvider";
+import { WardSocketProvider } from "@context/WardSocketProvider";
+import { useAuth } from "@context/AuthContext";
+import UIKit from "@components/UIKit";
+import Ward from "@/components/ward/Ward";
+import Draft from "./components/Draft";
 
 function AppContent() {
   const auth = useAuth();
@@ -88,7 +90,9 @@ function AppContent() {
         <main className="app-main">
           <Routes>
             <Route path="/" element={<WardDashboard />} />
-            <Route path="/patient-room" element={<PatientRoom />} />
+            <Route path="/Ward" element={<Ward />} />
+            <Route path="/UIKit" element={<UIKit />} />
+            <Route path="/Draft" element={<Draft />} />
           </Routes>
         </main>
       </Router>

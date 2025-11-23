@@ -18,12 +18,32 @@ export const Navigation = () => {
         </li>
         <li className="nav-item">
           <NavLink
-            to="/patient-room"
+            to="/ward"
             className={({ isActive }) =>
               isActive ? "nav-link active" : "nav-link"
             }
           >
-            Patient Room
+            Ward
+          </NavLink>
+        </li>
+        <li className="nav-item">
+          <NavLink
+            to="/uikit"
+            className={({ isActive }) =>
+              isActive ? "nav-link active" : "nav-link"
+            }
+          >
+            UI Kit
+          </NavLink>
+        </li>
+        <li className="nav-item">
+          <NavLink
+            to="/draft"
+            className={({ isActive }) =>
+              isActive ? "nav-link active" : "nav-link"
+            }
+          >
+            Draft
           </NavLink>
         </li>
       </ul>

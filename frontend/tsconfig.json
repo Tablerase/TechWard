@@ -9,6 +9,7 @@
       "@/*": ["src/*"],
       "@hooks/*": ["src/hooks/*"],
       "@components/*": ["src/components/*"],
+      "@context/*": ["src/context/*"],
       "@assets/*": ["src/assets/*"],
       "@services/*": ["src/services/*"],
       "@utils/*": ["src/utils/*"]

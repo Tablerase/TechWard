@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { useWardSocket } from "@context/WardSocketContext";
+import { useDevice } from "@hooks/useDevice";
 import { getProblemColor, isUrgentStatus } from "@utils/problemStatus";
 import HospitalBed from "./devices/HospitalBed";
 import StatusLegend from "./StatusLegend";
@@ -41,9 +42,46 @@ const Ward = () => {
   const WARD_HEIGHT = 1600;
 
   const { wardPatients, caregiverInfo, lastProblemUpdate } = useWardSocket();
+  const { isMobile, isTablet, deviceInfo } = useDevice();
   const [caregivers, setCaregivers] = useState<Map<string, CaregiverPosition>>(
     new Map()
   );
+
+  // Responsive zoom configuration based on device type
+  const zoomConfig = useMemo(() => {
+    if (isMobile) {
+      // Mobile: Smaller initial scale for overview, wider zoom range for detail viewing
+      return {
+        initialScale: 0.35,
+        minScale: 0.2,
+        maxScale: 3.5,
+        wheelStep: 0.15,
+      };
+    }
+    if (isTablet) {
+      // Tablet: Balanced between mobile and desktop
+      return {
+        initialScale: 0.45,
+        minScale: 0.3,
+        maxScale: 2.5,
+        wheelStep: 0.12,
+      };
+    }
+    // Desktop: Comfortable view with moderate zoom range
+    return {
+      initialScale: 0.6,
+      minScale: 0.3,
+      maxScale: 2,
+      wheelStep: 0.1,
+    };
+  }, [isMobile, isTablet]);
+
+  // Disable double-click zoom on touch devices (use pinch gesture instead)
+  const doubleClickConfig = useMemo(() => {
+    return deviceInfo.isTouchDevice
+      ? { disabled: true }
+      : { mode: "reset" as const };
+  }, [deviceInfo.isTouchDevice]);
 
   // Calculate room layouts based on number of patients with fixed dimensions
   const roomLayouts: RoomLayout[] = useMemo(() => {
@@ -188,41 +226,49 @@ const Ward = () => {
   return (
     <div className="relative w-screen h-screen bg-background overflow-hidden">
       <TransformWrapper
-        initialScale={0.5}
-        minScale={0.3}
-        maxScale={2}
+        initialScale={zoomConfig.initialScale}
+        minScale={zoomConfig.minScale}
+        maxScale={zoomConfig.maxScale}
         centerOnInit
-        wheel={{ step: 0.1 }}
-        doubleClick={{ mode: "reset" }}
+        wheel={{ step: zoomConfig.wheelStep }}
+        doubleClick={doubleClickConfig}
       >
         {({ zoomIn, zoomOut, resetTransform }) => (
           <>
             {/* Zoom Controls - Floating */}
-            <div className="absolute top-4 right-4 z-50 flex flex-col gap-2">
+            <div
+              className={`absolute top-4 right-4 z-50 flex gap-2 ${
+                isMobile ? "flex-row" : "flex-col"
+              }`}
+            >
               <Button
-                size="icon"
+                size={isMobile ? "sm" : "icon"}
                 variant="secondary"
                 onClick={() => zoomIn()}
                 title="Zoom In"
+                className={isMobile ? "px-3" : ""}
               >
                 <ZoomIn className="h-4 w-4" />
               </Button>
               <Button
-                size="icon"
+                size={isMobile ? "sm" : "icon"}
                 variant="secondary"
                 onClick={() => zoomOut()}
                 title="Zoom Out"
+                className={isMobile ? "px-3" : ""}
               >
                 <ZoomOut className="h-4 w-4" />
               </Button>
-              <Button
-                size="icon"
-                variant="secondary"
-                onClick={() => resetTransform()}
-                title="Reset View"
-              >
-                <Maximize2 className="h-4 w-4" />
-              </Button>
+              {!isMobile && (
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  onClick={() => resetTransform()}
+                  title="Reset View"
+                >
+                  <Maximize2 className="h-4 w-4" />
+                </Button>
+              )}
             </div>
 
             <TransformComponent
@@ -632,12 +678,17 @@ const Ward = () => {
       <Drawer>
         <DrawerTrigger asChild>
           <Button
-            size="icon"
+            size={isMobile ? "sm" : "icon"}
             variant="secondary"
-            className="absolute bottom-4 right-4 z-50"
+            className={`absolute z-50 ${
+              isMobile
+                ? "bottom-4 left-1/2 -translate-x-1/2"
+                : "bottom-4 right-4"
+            }`}
             title="Status Legend"
           >
             <Info className="h-4 w-4" />
+            {isMobile && <span className="ml-2">Legend</span>}
           </Button>
         </DrawerTrigger>
         <DrawerContent>

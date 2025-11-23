@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import WardDashboard from "@components/WardDashboard";
-import { Navigation } from "@components/Navigation";
 import { AuthProvider } from "@context/AuthProvider";
 import { WardSocketProvider } from "@context/WardSocketProvider";
+import { DeviceProvider } from "@context/DeviceProvider";
 import { useAuth } from "@context/AuthContext";
 import UIKit from "@components/UIKit";
 import Ward from "@/components/ward/Ward";
@@ -101,9 +101,11 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <DeviceProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </DeviceProvider>
   );
 }
 

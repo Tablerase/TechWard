@@ -45,8 +45,8 @@ interface CaregiverPosition {
 
 const Ward = () => {
   // Fixed dimensions for the ward map - allows for consistent layout and future room additions
-  const WARD_WIDTH = 2400;
-  const WARD_HEIGHT = 1600;
+  const WARD_WIDTH = 1600;
+  const WARD_HEIGHT = 2400;
 
   const { wardPatients, caregiverInfo, lastProblemUpdate } = useWardSocket();
   const { isMobile, isTablet, deviceInfo } = useDevice();
@@ -95,6 +95,7 @@ const Ward = () => {
       : { mode: "reset" as const };
   }, [deviceInfo.isTouchDevice]);
 
+  // TODO: Remove dynamic calculations and hardcode room layouts for performance and simplicity
   // Calculate room layouts based on number of patients with fixed dimensions
   const roomLayouts: RoomLayout[] = useMemo(() => {
     if (!wardPatients?.patients) return [];
@@ -418,8 +419,6 @@ const Ward = () => {
                       >
                         <PatientRoom
                           key={room.id}
-                          width={room.width}
-                          height={room.height}
                           patient={patient}
                           roomId={room.id}
                         />

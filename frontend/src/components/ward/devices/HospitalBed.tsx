@@ -15,6 +15,12 @@ interface HospitalBedProps {
   id?: string;
 }
 
+/**
+ * SVG component representing a hospital bed.
+ * Props allow customization of colors and styles.
+ *
+ * @description Dimension: width 277px, height 512px
+ * */
 const HospitalBed: React.FC<HospitalBedProps> = ({
   className,
   style,
@@ -35,8 +41,8 @@ const HospitalBed: React.FC<HospitalBedProps> = ({
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="277"
-      height="512"
+      width={277}
+      height={512}
       viewBox="0 0 277 512"
       fill="none"
       className={className}

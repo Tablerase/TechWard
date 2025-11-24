@@ -2,9 +2,11 @@ import { useEffect, useState, useMemo } from "react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { useWardSocket } from "@context/WardSocketContext";
 import { useDevice } from "@hooks/useDevice";
-import { getProblemColor, isUrgentStatus } from "@utils/problemStatus";
-import HospitalBed from "./devices/HospitalBed";
 import StatusLegend from "./StatusLegend";
+import PatientRoom from "./rooms/PatientRoom";
+import BreakRoom from "./rooms/BreakRoom";
+import CaregiverOffice from "./rooms/CaregiverOffice";
+import StorageRoom from "./rooms/StorageRoom";
 import {
   Drawer,
   DrawerClose,
@@ -18,13 +20,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { Info, ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
 
+type RoomType = "patient" | "break" | "office" | "storage";
+
 interface RoomLayout {
   x: number;
   y: number;
   width: number;
   height: number;
-  patientId: string;
-  patientName: string;
+  type: RoomType;
+  id: string;
+  name: string;
+  patientId?: string;
+  patientName?: string;
 }
 
 interface CaregiverPosition {
@@ -49,19 +56,24 @@ const Ward = () => {
 
   // Responsive zoom configuration based on device type
   const zoomConfig = useMemo(() => {
+    const initialScale =
+      WARD_WIDTH / 2 < deviceInfo.viewportWidth
+        ? 1
+        : WARD_WIDTH / 2 / deviceInfo.viewportWidth;
+
     if (isMobile) {
       // Mobile: Smaller initial scale for overview, wider zoom range for detail viewing
       return {
-        initialScale: 0.35,
+        initialScale: initialScale,
         minScale: 0.2,
-        maxScale: 3.5,
+        maxScale: 4,
         wheelStep: 0.15,
       };
     }
     if (isTablet) {
       // Tablet: Balanced between mobile and desktop
       return {
-        initialScale: 0.45,
+        initialScale: initialScale,
         minScale: 0.3,
         maxScale: 2.5,
         wheelStep: 0.12,
@@ -69,12 +81,12 @@ const Ward = () => {
     }
     // Desktop: Comfortable view with moderate zoom range
     return {
-      initialScale: 0.6,
+      initialScale: initialScale,
       minScale: 0.3,
       maxScale: 2,
       wheelStep: 0.1,
     };
-  }, [isMobile, isTablet]);
+  }, [isMobile, isTablet, deviceInfo.viewportWidth]);
 
   // Disable double-click zoom on touch devices (use pinch gesture instead)
   const doubleClickConfig = useMemo(() => {
@@ -90,8 +102,8 @@ const Ward = () => {
     const padding = 40;
     const hallwayWidth = 120;
     const roomsPerSide = Math.ceil(wardPatients.patients.length / 2);
-    const roomWidth = (WARD_WIDTH - hallwayWidth - padding * 2) / 2;
-    const roomHeight = (WARD_HEIGHT - padding * 2) / roomsPerSide;
+    const roomWidth = 400;
+    const roomHeight = 400;
 
     const layouts: RoomLayout[] = [];
 
@@ -104,9 +116,50 @@ const Ward = () => {
         y: padding + rowIndex * roomHeight,
         width: roomWidth,
         height: roomHeight,
+        type: "patient",
+        id: patient.id,
+        name: patient.name,
         patientId: patient.id,
         patientName: patient.name,
       });
+    });
+
+    // Add utility rooms at the bottom
+    const utilityRoomY = WARD_HEIGHT - 220;
+    const utilityRoomHeight = 180;
+    const utilityRoomWidth = 280;
+
+    // Break Room (bottom-left)
+    layouts.push({
+      x: padding,
+      y: utilityRoomY,
+      width: utilityRoomWidth,
+      height: utilityRoomHeight,
+      type: "break",
+      id: "break-room",
+      name: "Break Room",
+    });
+
+    // Caregiver Office (bottom-center)
+    layouts.push({
+      x: WARD_WIDTH / 2 - utilityRoomWidth / 2,
+      y: utilityRoomY,
+      width: utilityRoomWidth,
+      height: utilityRoomHeight,
+      type: "office",
+      id: "caregiver-office",
+      name: "Caregiver Office",
+    });
+
+    // Storage Room (bottom-right)
+    layouts.push({
+      x: WARD_WIDTH - padding - utilityRoomWidth,
+      y: utilityRoomY,
+      width: utilityRoomWidth,
+      height: utilityRoomHeight,
+      type: "storage",
+      id: "storage-room",
+      name: "Storage Room",
     });
 
     return layouts;
@@ -351,150 +404,68 @@ const Ward = () => {
                 </text>
 
                 {/* Patient Rooms */}
-                {roomLayouts.map((room) => {
-                  const patient = wardPatients?.patients.find(
-                    (p) => p.id === room.patientId
-                  );
-                  const mostUrgent = patient?.problems.find((p) =>
-                    isUrgentStatus(p.status)
-                  );
+                {roomLayouts
+                  .filter((room) => room.type === "patient")
+                  .map((room) => {
+                    const patient = wardPatients?.patients.find(
+                      (p) => p.id === room.patientId
+                    );
 
-                  return (
-                    <g key={room.patientId}>
-                      {/* Room outline */}
-                      <rect
-                        x={room.x}
-                        y={room.y}
-                        width={room.width}
-                        height={room.height}
-                        fill="url(#wallGradient)"
-                        stroke="var(--color-primary)"
-                        strokeWidth="3"
-                        rx="8"
-                      />
-
-                      {/* Room number */}
-                      <rect
-                        x={room.x + 10}
-                        y={room.y + 10}
-                        width="50"
-                        height="30"
-                        fill="var(--color-background)"
-                        stroke="var(--color-primary)"
-                        strokeWidth="2"
-                        rx="4"
-                      />
-                      <text
-                        x={room.x + 35}
-                        y={room.y + 32}
-                        textAnchor="middle"
-                        fill="var(--color-primary)"
-                        fontSize="18"
-                        fontWeight="bold"
-                      >
-                        {room.patientId}
-                      </text>
-
-                      {/* Patient name */}
-                      <text
-                        x={room.x + room.width / 2}
-                        y={room.y + 55}
-                        textAnchor="middle"
-                        fill="var(--color-base-text)"
-                        fontSize="16"
-                        fontWeight="bold"
-                      >
-                        {room.patientName}
-                      </text>
-
-                      {/* Patient bed icon */}
+                    return (
                       <g
-                        transform={`translate(${
-                          room.x + room.width / 2 - 75
-                        }, ${room.y + 80}) scale(0.5)`}
+                        transform={`translate(${room.x}, ${room.y})`}
+                        key={room.id}
                       >
-                        <HospitalBed
-                          strokeWidth={0}
-                          stroke="var(--color-border)"
-                          frameColor="var(--color-primary)"
-                          accentColor="var(--color-lavender-300)"
-                          mattressColor="var(--color-base-surface-muted)"
-                          sheetColor="var(--color-apricot-200)"
-                          pillowColor="var(--color-background)"
+                        <PatientRoom
+                          key={room.id}
+                          width={room.width}
+                          height={room.height}
+                          patient={patient}
+                          roomId={room.id}
                         />
                       </g>
+                    );
+                  })}
 
-                      {/* Problem indicators */}
-                      {patient?.problems.map((problem, idx) => (
-                        <g key={problem.id}>
-                          {/* Problem badge */}
-                          <circle
-                            cx={room.x + room.width / 2 - 40 + idx * 30}
-                            cy={room.y + room.height - 40}
-                            r="12"
-                            fill={getProblemColor(problem.status)}
-                            stroke="var(--color-background)"
-                            strokeWidth="2"
+                {/* Utility Rooms */}
+                {roomLayouts
+                  .filter((room) => room.type !== "patient")
+                  .map((room) => {
+                    switch (room.type) {
+                      case "break":
+                        return (
+                          <BreakRoom
+                            key={room.id}
+                            x={room.x}
+                            y={room.y}
+                            width={room.width}
+                            height={room.height}
                           />
-                          {problem.status === "critical" && (
-                            <text
-                              x={room.x + room.width / 2 - 40 + idx * 30}
-                              y={room.y + room.height - 36}
-                              textAnchor="middle"
-                              fill="var(--color-background)"
-                              fontSize="18"
-                              fontWeight="bold"
-                            >
-                              !
-                            </text>
-                          )}
-                          {problem.assignedTo && (
-                            <text
-                              x={room.x + room.width / 2}
-                              y={room.y + room.height - 15}
-                              textAnchor="middle"
-                              fill="var(--color-base-text-muted)"
-                              fontSize="12"
-                            >
-                              Assigned:{" "}
-                              {problem.assignedTo.caregiverName.firstName}
-                            </text>
-                          )}
-                        </g>
-                      ))}
-
-                      {/* Alert indicator for critical problems */}
-                      {mostUrgent && (
-                        <g>
-                          <circle
-                            cx={room.x + room.width - 25}
-                            cy={room.y + 25}
-                            r="15"
-                            fill={getProblemColor(mostUrgent.status)}
-                            className="animate-pulse"
-                          >
-                            <animate
-                              attributeName="opacity"
-                              values="1;0.5;1"
-                              dur="1.5s"
-                              repeatCount="indefinite"
-                            />
-                          </circle>
-                          <text
-                            x={room.x + room.width - 25}
-                            y={room.y + 30}
-                            textAnchor="middle"
-                            fill="var(--color-background)"
-                            fontSize="20"
-                            fontWeight="bold"
-                          >
-                            !
-                          </text>
-                        </g>
-                      )}
-                    </g>
-                  );
-                })}
+                        );
+                      case "office":
+                        return (
+                          <CaregiverOffice
+                            key={room.id}
+                            x={room.x}
+                            y={room.y}
+                            width={room.width}
+                            height={room.height}
+                          />
+                        );
+                      case "storage":
+                        return (
+                          <StorageRoom
+                            key={room.id}
+                            x={room.x}
+                            y={room.y}
+                            width={room.width}
+                            height={room.height}
+                          />
+                        );
+                      default:
+                        return null;
+                    }
+                  })}
 
                 {/* Caregivers */}
                 {Array.from(caregivers.values()).map((caregiver) => (

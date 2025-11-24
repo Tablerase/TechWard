@@ -1,13 +1,13 @@
 import { Button } from "@components/ui/button";
 import { toast } from "sonner";
-import { ButtonGroup } from "./ui/button-group";
+import { ButtonGroup } from "@components/ui/button-group";
 import { SearchIcon } from "lucide-react";
-import { Input } from "./ui/input";
-import { Separator } from "./ui/separator";
-import { Kbd } from "./ui/kbd";
+import { Input } from "@components/ui/input";
+import { Separator } from "@components/ui/separator";
+import { Kbd } from "@components/ui/kbd";
 import { BadgeCheckIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Slider } from "./ui/slider";
+import { Slider } from "@components/ui/slider";
 import { useState } from "react";
 
 const ColorBlock = ({

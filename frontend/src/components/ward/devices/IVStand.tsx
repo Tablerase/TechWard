@@ -29,8 +29,8 @@ const IVStand: React.FC<IVStandProps> = ({
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="100"
-      height="270"
+      width={100}
+      height={270}
       viewBox="0 0 100 270"
       fill="none"
       className={className}

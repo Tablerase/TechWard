@@ -19,35 +19,14 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Info, ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
-
-type RoomType = "patient" | "break" | "office" | "storage";
-
-interface RoomLayout {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  type: RoomType;
-  id: string;
-  name: string;
-  patientId?: string;
-  patientName?: string;
-}
-
-interface CaregiverPosition {
-  caregiverId: string;
-  name: string;
-  x: number;
-  y: number;
-  isMoving: boolean;
-  assignedRoom?: string;
-}
+import { WARD_DIMENSIONS } from "./rooms/roomDimensions";
+import {
+  CaregiverPosition,
+  configuredRoomLayouts,
+  RoomLayout,
+} from "./rooms/roomLayout";
 
 const Ward = () => {
-  // Fixed dimensions for the ward map - allows for consistent layout and future room additions
-  const WARD_WIDTH = 1600;
-  const WARD_HEIGHT = 2400;
-
   const { wardPatients, caregiverInfo, lastProblemUpdate } = useWardSocket();
   const { isMobile, isTablet, deviceInfo } = useDevice();
   const [caregivers, setCaregivers] = useState<Map<string, CaregiverPosition>>(
@@ -57,9 +36,9 @@ const Ward = () => {
   // Responsive zoom configuration based on device type
   const zoomConfig = useMemo(() => {
     const initialScale =
-      WARD_WIDTH / 2 < deviceInfo.viewportWidth
+      WARD_DIMENSIONS.width / 2 < deviceInfo.viewportWidth
         ? 1
-        : WARD_WIDTH / 2 / deviceInfo.viewportWidth;
+        : WARD_DIMENSIONS.width / 2 / deviceInfo.viewportWidth;
 
     if (isMobile) {
       // Mobile: Smaller initial scale for overview, wider zoom range for detail viewing
@@ -95,73 +74,16 @@ const Ward = () => {
       : { mode: "reset" as const };
   }, [deviceInfo.isTouchDevice]);
 
-  // TODO: Remove dynamic calculations and hardcode room layouts for performance and simplicity
-  // Calculate room layouts based on number of patients with fixed dimensions
+  // Place patients into room layouts
   const roomLayouts: RoomLayout[] = useMemo(() => {
-    if (!wardPatients?.patients) return [];
+    const layouts: RoomLayout[] = configuredRoomLayouts.slice();
 
-    const padding = 40;
-    const hallwayWidth = 120;
-    const roomsPerSide = Math.ceil(wardPatients.patients.length / 2);
-    const roomWidth = 400;
-    const roomHeight = 400;
-
-    const layouts: RoomLayout[] = [];
-
-    wardPatients.patients.forEach((patient, index) => {
-      const isLeftSide = index % 2 === 0;
-      const rowIndex = Math.floor(index / 2);
-
-      layouts.push({
-        x: isLeftSide ? padding : WARD_WIDTH - padding - roomWidth,
-        y: padding + rowIndex * roomHeight,
-        width: roomWidth,
-        height: roomHeight,
-        type: "patient",
-        id: patient.id,
-        name: patient.name,
-        patientId: patient.id,
-        patientName: patient.name,
+    if (wardPatients) {
+      wardPatients.patients.forEach((patient, index) => {
+        layouts[index].patientId = patient.id;
+        layouts[index].patientName = patient.name;
       });
-    });
-
-    // Add utility rooms at the bottom
-    const utilityRoomY = WARD_HEIGHT - 220;
-    const utilityRoomHeight = 180;
-    const utilityRoomWidth = 280;
-
-    // Break Room (bottom-left)
-    layouts.push({
-      x: padding,
-      y: utilityRoomY,
-      width: utilityRoomWidth,
-      height: utilityRoomHeight,
-      type: "break",
-      id: "break-room",
-      name: "Break Room",
-    });
-
-    // Caregiver Office (bottom-center)
-    layouts.push({
-      x: WARD_WIDTH / 2 - utilityRoomWidth / 2,
-      y: utilityRoomY,
-      width: utilityRoomWidth,
-      height: utilityRoomHeight,
-      type: "office",
-      id: "caregiver-office",
-      name: "Caregiver Office",
-    });
-
-    // Storage Room (bottom-right)
-    layouts.push({
-      x: WARD_WIDTH - padding - utilityRoomWidth,
-      y: utilityRoomY,
-      width: utilityRoomWidth,
-      height: utilityRoomHeight,
-      type: "storage",
-      id: "storage-room",
-      name: "Storage Room",
-    });
+    }
 
     return layouts;
   }, [wardPatients]);
@@ -169,8 +91,8 @@ const Ward = () => {
   // Initialize current caregiver position
   useEffect(() => {
     if (caregiverInfo && !caregivers.has(caregiverInfo.name.firstName)) {
-      const hallwayX = WARD_WIDTH / 2;
-      const hallwayY = WARD_HEIGHT / 2;
+      const hallwayX = WARD_DIMENSIONS.width / 2;
+      const hallwayY = WARD_DIMENSIONS.height / 2;
 
       setCaregivers((prev) => {
         const updated = new Map(prev);
@@ -245,8 +167,8 @@ const Ward = () => {
       if (!caregiverName) return;
 
       // Move caregiver back to hallway
-      const hallwayX = WARD_WIDTH / 2;
-      const hallwayY = WARD_HEIGHT / 2;
+      const hallwayX = WARD_DIMENSIONS.width / 2;
+      const hallwayY = WARD_DIMENSIONS.height / 2;
 
       setCaregivers((prev) => {
         const updated = new Map(prev);
@@ -337,9 +259,9 @@ const Ward = () => {
             >
               {/* Main SVG Frame */}
               <svg
-                width={WARD_WIDTH}
-                height={WARD_HEIGHT}
-                viewBox={`0 0 ${WARD_WIDTH} ${WARD_HEIGHT}`}
+                width={WARD_DIMENSIONS.width}
+                height={WARD_DIMENSIONS.height}
+                viewBox={`0 0 ${WARD_DIMENSIONS.width} ${WARD_DIMENSIONS.height}`}
                 xmlns="http://www.w3.org/2000/svg"
                 className="w-full h-full"
               >
@@ -379,27 +301,30 @@ const Ward = () => {
 
                 {/* Floor */}
                 <rect
-                  width={WARD_WIDTH}
-                  height={WARD_HEIGHT}
+                  width={WARD_DIMENSIONS.width}
+                  height={WARD_DIMENSIONS.height}
                   fill="url(#floorTile)"
                 />
 
                 {/* Hallway */}
                 <rect
-                  x={(WARD_WIDTH - 120) / 2}
+                  x={
+                    WARD_DIMENSIONS.width / 2 - WARD_DIMENSIONS.hallwayWidth / 2
+                  }
                   y="0"
-                  width="120"
-                  height={WARD_HEIGHT}
+                  width={WARD_DIMENSIONS.hallwayWidth}
+                  height={WARD_DIMENSIONS.height}
                   fill="var(--color-base-surface-muted)"
                   opacity="0.5"
                 />
                 <text
-                  x={WARD_WIDTH / 2}
+                  x={WARD_DIMENSIONS.width / 2}
                   y="30"
                   textAnchor="middle"
-                  fill="var(--color-base-text)"
+                  fill="var(--color-base-surface)"
                   fontSize="20"
                   fontWeight="bold"
+                  fontFamily="var(--font-display)"
                 >
                   Ward Hallway
                 </text>
@@ -407,20 +332,21 @@ const Ward = () => {
                 {/* Patient Rooms */}
                 {roomLayouts
                   .filter((room) => room.type === "patient")
-                  .map((room) => {
+                  .map((room, roomIndex) => {
                     const patient = wardPatients?.patients.find(
                       (p) => p.id === room.patientId
                     );
 
                     return (
                       <g
-                        transform={`translate(${room.x}, ${room.y})`}
+                        transform={`translate(${room.x}, ${room.y}) `}
                         key={room.id}
                       >
                         <PatientRoom
                           key={room.id}
                           patient={patient}
                           roomId={room.id}
+                          inversed={roomIndex % 2 !== 0}
                         />
                       </g>
                     );

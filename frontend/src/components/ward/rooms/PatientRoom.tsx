@@ -36,6 +36,9 @@ interface PatientRoomProps {
   y?: number;
   patient?: Patient;
   roomId?: string;
+  inversed?: boolean;
+  pattern?: boolean;
+  alpha?: number;
 }
 
 const PatientRoom = ({
@@ -44,6 +47,9 @@ const PatientRoom = ({
   patient,
   idPrefix = "patient-room",
   roomId,
+  inversed = false,
+  pattern = false,
+  alpha = 0.6,
 }: PatientRoomProps) => {
   const width = 480;
   const height = 272;
@@ -97,34 +103,47 @@ const PatientRoom = ({
       aria-labelledby={`${idPrefix}-title`}
     >
       {/* Define patterns and gradients */}
-      <defs>
-        <pattern
-          id="patientFloorTile"
-          x="0"
-          y="0"
-          width="40"
-          height="40"
-          patternUnits="userSpaceOnUse"
-        >
-          <rect width="40" height="40" fill={floorColor} />
-          <path
-            d="M 0 0 L 40 0 L 40 40 L 0 40 Z"
-            fill="none"
-            stroke={floorBorderColor}
-            strokeWidth="1"
-          />
-        </pattern>
-      </defs>
+      {pattern && (
+        <defs>
+          <pattern
+            id="patientFloorTile"
+            x="0"
+            y="0"
+            width="40"
+            height="40"
+            patternUnits="userSpaceOnUse"
+          >
+            <rect width="40" height="40" fill={floorColor} />
+            <path
+              d="M 0 0 L 40 0 L 40 40 L 0 40 Z"
+              fill="none"
+              stroke={floorBorderColor}
+              strokeWidth="1"
+            />
+          </pattern>
+        </defs>
+      )}
       <g id={`${uniqueId}-patient-room-${roomId}`}>
         <g id="RoomArea">
-          <path
-            id="Room"
-            d="M476 251V260.5C476 264.918 472.418 268.5 468 268.5H12.5C8.08172 268.5 4.5 264.918 4.5 260.5V12.5C4.5 8.08171 8.08172 4.5 12.5 4.5H468C472.418 4.5 476 8.08172 476 12.5V201.5"
-            fill="url(#patientFloorTile)"
-            stroke={floorBorderColor}
-            strokeWidth="8"
-            strokeLinecap="round"
-          />
+          <g
+            id="WallArea"
+            transform={
+              inversed ? `scale(-1, 1) translate(-${width}, 0)` : undefined
+            }
+          >
+            <path
+              id="Room"
+              d="M476 251V260.5C476 264.918 472.418 268.5 468 268.5H12.5C8.08172 268.5 4.5 264.918 4.5 260.5V12.5C4.5 8.08171 8.08172 4.5 12.5 4.5H468C472.418 4.5 476 8.08172 476 12.5V201.5"
+              fill={
+                pattern
+                  ? "url(#patientFloorTile)"
+                  : `oklch(from ${floorColor} l c h / ${alpha})`
+              }
+              stroke={floorBorderColor}
+              strokeWidth="8"
+              strokeLinecap="round"
+            />
+          </g>
 
           {/* Room number */}
           <rect
@@ -159,16 +178,26 @@ const PatientRoom = ({
           >
             {patient?.name || "Empty"}
           </text>
-          <g id="BathRoomArea">
+          <g
+            id="BathRoomArea"
+            transform={
+              inversed ? `scale(-1, 1) translate(-${width}, 0)` : undefined
+            }
+          >
             <path
               id="BathRoom"
               d="M150 178H13C8.58172 178 5 174.418 5 170V12C5 7.58172 8.58172 4 13 4H221C225.418 4 229 7.58172 229 12V170C229 174.418 225.418 178 221 178H200"
               stroke={floorBorderColor}
-              strokeWidth="8"
+              strokeWidth="6.5"
               strokeLinecap="round"
             />
           </g>
-          <g id="BedArea">
+          <g
+            id="BedArea"
+            transform={
+              inversed ? `scale(-1, 1) translate(-${width}, 0)` : undefined
+            }
+          >
             {/* IV Stand - positioned in upper right area of room */}
             <g
               transform={`translate(${ivStandX}, ${ivStandY}) scale(${ivStandScale})`}

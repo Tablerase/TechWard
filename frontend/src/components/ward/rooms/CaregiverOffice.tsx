@@ -50,6 +50,7 @@ const CaregiverOffice = ({ x, y, width, height }: CaregiverOfficeProps) => {
         fill="var(--color-base-text)"
         fontSize="16"
         fontWeight="bold"
+        fontFamily="var(--font-display)"
       >
         Caregiver Office
       </text>

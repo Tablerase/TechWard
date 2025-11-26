@@ -50,6 +50,7 @@ const BreakRoom = ({ x, y, width, height }: BreakRoomProps) => {
         fill="var(--color-base-text)"
         fontSize="16"
         fontWeight="bold"
+        fontFamily="var(--font-display)"
       >
         Break Room
       </text>

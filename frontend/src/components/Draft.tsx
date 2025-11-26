@@ -13,6 +13,7 @@ const Draft = () => {
       <PatientRoom
         roomId="10"
         patient={{ id: "p5", name: "Bidul", problems: [] }}
+        pattern={true}
       />
       <Separator orientation="horizontal" className="my-4" />
       <HospitalBed />

@@ -50,6 +50,7 @@ const StorageRoom = ({ x, y, width, height }: StorageRoomProps) => {
         fill="var(--color-base-text)"
         fontSize="16"
         fontWeight="bold"
+        fontFamily="var(--font-display)"
       >
         Storage Room
       </text>
